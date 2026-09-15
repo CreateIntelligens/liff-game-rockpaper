@@ -1,0 +1,29 @@
+FROM node:24.3.0-bookworm-slim AS build
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY apps/web/package.json apps/web/package.json
+COPY apps/api/package.json apps/api/package.json
+COPY packages/core/package.json packages/core/package.json
+COPY packages/ports/package.json packages/ports/package.json
+COPY packages/config/package.json packages/config/package.json
+RUN npm ci
+
+COPY . .
+RUN npm run build --workspace @rockpaper/api
+
+FROM node:24.3.0-bookworm-slim AS runtime
+
+ENV NODE_ENV=production
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY apps/api/package.json apps/api/package.json
+COPY packages/core/package.json packages/core/package.json
+COPY packages/ports/package.json packages/ports/package.json
+COPY packages/config/package.json packages/config/package.json
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/apps/api/dist ./apps/api/dist
+RUN mkdir -p /app/data && chown -R node:node /app/data
+USER node
+EXPOSE 3000
+CMD ["node", "apps/api/dist/server.js"]

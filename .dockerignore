@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+data
+.env
+.git
+.gitignore
+openspec
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

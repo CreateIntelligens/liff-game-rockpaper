@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" role="img" aria-labelledby="title">
+  <title id="title">Rock paper scissors campaign frame placeholder</title>
+  <rect width="1080" height="1080" fill="none"/>
+  <rect x="28" y="28" width="1024" height="1024" rx="48" fill="none" stroke="#8fc8bc" stroke-width="24"/>
+  <path d="M80 200V80h120M880 80h120v120M1000 880v120H880M200 1000H80V880" fill="none" stroke="#f2c078" stroke-width="12"/>
+</svg>

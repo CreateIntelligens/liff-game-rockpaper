@@ -1,0 +1,12 @@
+{
+  "name": "@rockpaper/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "zod": "^3.25.0"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

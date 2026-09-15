@@ -1,0 +1,48 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      APP_NAME: ${APP_NAME:-猜拳挑戰}
+      PORT: 3000
+      API_BASE_URL: http://localhost/api
+      PUBLIC_BASE_URL: http://localhost
+      DATABASE_PATH: /app/data/game.sqlite
+      ALLOWED_ORIGIN: http://localhost
+      LIFF_ID: ${LIFF_ID:-}
+      LIFF_ENABLED: ${LIFF_ENABLED:-false}
+      CAMERA_ENABLED: ${CAMERA_ENABLED:-true}
+      CAMERA_FALLBACK_ENABLED: ${CAMERA_FALLBACK_ENABLED:-true}
+      MGM_ENABLED: ${MGM_ENABLED:-false}
+      LEADERBOARD_ENABLED: ${LEADERBOARD_ENABLED:-true}
+      EMAIL_ENABLED: ${EMAIL_ENABLED:-false}
+      RULE_VERSION: ${RULE_VERSION:-v1}
+      ASSET_VERSION: ${ASSET_VERSION:-assets-v1}
+      LINE_CHANNEL_ID: ${LINE_CHANNEL_ID:-}
+      LINE_CHANNEL_SECRET: ${LINE_CHANNEL_SECRET:-}
+      LINE_CHANNEL_ACCESS_TOKEN: ${LINE_CHANNEL_ACCESS_TOKEN:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      RESEND_FROM: ${RESEND_FROM:-}
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

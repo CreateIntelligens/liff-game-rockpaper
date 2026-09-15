@@ -1,0 +1,221 @@
+export type Locale = "zh-TW" | "en";
+export type Theme = "dark" | "light";
+
+type MessageKey =
+  | "brand"
+  | "title"
+  | "intro"
+  | "loading"
+  | "authenticated"
+  | "preview"
+  | "unavailable"
+  | "ready"
+  | "energyPreparing"
+  | "energy"
+  | "languageLabel"
+  | "localeZh"
+  | "localeEn"
+  | "statusLabel"
+  | "cameraStart"
+  | "cameraStarting"
+  | "cameraReady"
+  | "cameraDenied"
+  | "recognize"
+  | "fallbackOffer"
+  | "fallbackOptIn"
+  | "fallbackManual"
+  | "fallbackRandom"
+  | "chooseHand"
+  | "rock"
+  | "paper"
+  | "scissors"
+  | "playing"
+  | "resultWin"
+  | "resultLose"
+  | "resultDraw"
+  | "gameLockedPreview"
+  | "leaderboards"
+  | "invitationBoard"
+  | "winBoard"
+  | "loadingBoard"
+  | "mgm"
+  | "mgmOptIn"
+  | "mgmOptedIn"
+  | "referralCount"
+  | "optIn"
+  | "errorRetry"
+  | "cameraUnknown"
+  | "energyEmpty"
+  | "fallbackDisabled"
+  | "cameraPrompt"
+  | "leaderboardEmpty"
+  | "inviteLink"
+  | "copyLink"
+  | "linkCopied"
+  | "myRank"
+  | "noRank"
+  | "score"
+  | "themeLabel"
+  | "themeDark"
+  | "themeLight";
+
+const messages: Record<Locale, Record<MessageKey, string>> = {
+  "zh-TW": {
+    brand: "猜拳挑戰 / LIFF",
+    title: "猜拳挑戰",
+    intro: "三點初始體力。相機辨識是主要玩法，替代出拳需要你的主動選擇。",
+    loading: "載入活動設定中…",
+    authenticated: "LINE 身分已驗證",
+    preview: "預覽模式",
+    unavailable: "活動設定或登入暫時無法使用",
+    ready: "活動骨架已啟動",
+    energyPreparing: "遊戲功能準備中",
+    energy: "目前體力：{value}",
+    languageLabel: "切換語系",
+    localeZh: "繁",
+    localeEn: "En",
+    statusLabel: "活動初始化狀態",
+    cameraStart: "啟用相機辨識",
+    cameraStarting: "啟動相機中…",
+    cameraReady: "相機已準備好",
+    cameraDenied: "無法使用相機，請選擇替代方式。",
+    recognize: "辨識手勢",
+    fallbackOffer: "要使用替代出拳嗎？",
+    fallbackOptIn: "我同意使用替代出拳",
+    fallbackManual: "手動選拳",
+    fallbackRandom: "隨機出拳",
+    chooseHand: "選擇你的手勢",
+    rock: "石頭",
+    paper: "布",
+    scissors: "剪刀",
+    playing: "結算中…",
+    resultWin: "你贏了！",
+    resultLose: "這局輸了",
+    resultDraw: "平手",
+    gameLockedPreview: "預覽模式無法進行正式遊戲",
+    leaderboards: "排行榜",
+    invitationBoard: "邀請排行",
+    winBoard: "勝場排行",
+    loadingBoard: "載入排行中…",
+    mgm: "會員邀請",
+    mgmOptIn: "同意參加會員邀請，成功邀請好友可補充體力。",
+    mgmOptedIn: "已參加會員邀請",
+    referralCount: "有效邀請：{value}",
+    optIn: "同意參加",
+    errorRetry: "發生問題，請再試一次。",
+    cameraUnknown: "沒有辨識到穩定手勢，請調整後再試。",
+    energyEmpty: "體力不足，請透過有效邀請補充體力。",
+    fallbackDisabled: "替代出拳目前未啟用。",
+    cameraPrompt: "把一隻手放進框內",
+    leaderboardEmpty: "目前還沒有排名資料",
+    inviteLink: "你的邀請連結",
+    copyLink: "複製連結",
+    linkCopied: "已複製",
+    myRank: "我的排名",
+    noRank: "尚無排名",
+    score: "分數：{value}",
+    themeLabel: "切換主題",
+    themeDark: "深",
+    themeLight: "淺",
+  },
+  en: {
+    brand: "ROCK PAPER / LIFF",
+    title: "Rock Paper Scissors",
+    intro: "Start with three energy points. Camera recognition is the main play mode; fallback moves require your choice.",
+    loading: "Loading campaign settings…",
+    authenticated: "LINE identity verified",
+    preview: "Preview mode",
+    unavailable: "Campaign settings or login are temporarily unavailable",
+    ready: "Campaign shell is ready",
+    energyPreparing: "Game features are getting ready",
+    energy: "Energy remaining: {value}",
+    languageLabel: "Change language",
+    localeZh: "繁",
+    localeEn: "En",
+    statusLabel: "Campaign initialization status",
+    cameraStart: "Enable camera recognition",
+    cameraStarting: "Starting camera…",
+    cameraReady: "Camera is ready",
+    cameraDenied: "Camera is unavailable. Choose a fallback move.",
+    recognize: "Recognize hand",
+    fallbackOffer: "Use a fallback move?",
+    fallbackOptIn: "I agree to use fallback moves",
+    fallbackManual: "Choose manually",
+    fallbackRandom: "Random move",
+    chooseHand: "Choose your hand",
+    rock: "Rock",
+    paper: "Paper",
+    scissors: "Scissors",
+    playing: "Resolving…",
+    resultWin: "You won!",
+    resultLose: "You lost this round",
+    resultDraw: "Draw",
+    gameLockedPreview: "Formal play is unavailable in preview mode",
+    leaderboards: "Leaderboards",
+    invitationBoard: "Invitations",
+    winBoard: "Wins",
+    loadingBoard: "Loading leaderboard…",
+    mgm: "Member referrals",
+    mgmOptIn: "Join member referrals to regain energy when friends join.",
+    mgmOptedIn: "Member referrals enabled",
+    referralCount: "Valid referrals: {value}",
+    optIn: "Join",
+    errorRetry: "Something went wrong. Please try again.",
+    cameraUnknown: "No stable gesture detected. Adjust your hand and try again.",
+    energyEmpty: "You are out of energy. Invite a valid member to regain energy.",
+    fallbackDisabled: "Fallback moves are not enabled.",
+    cameraPrompt: "Place one hand inside the frame",
+    leaderboardEmpty: "No ranking data yet",
+    inviteLink: "Your invitation link",
+    copyLink: "Copy link",
+    linkCopied: "Copied",
+    myRank: "My ranking",
+    noRank: "No ranking yet",
+    score: "Score: {value}",
+    themeLabel: "Change theme",
+    themeDark: "Dark",
+    themeLight: "Light",
+  },
+};
+
+const storageKey = "rockpaper.locale";
+const themeStorageKey = "rockpaper.theme";
+
+export function normalizeLocale(value: string | undefined): Locale {
+  if (value?.toLowerCase().startsWith("zh")) return "zh-TW";
+  return "en";
+}
+
+export function detectLocale(): Locale {
+  if (typeof navigator === "undefined") return "en";
+  return normalizeLocale(navigator.languages?.[0] ?? navigator.language);
+}
+
+export function getInitialLocale(): Locale {
+  if (typeof window === "undefined") return "en";
+  const saved = window.localStorage.getItem(storageKey);
+  return saved === "zh-TW" || saved === "en" ? saved : detectLocale();
+}
+
+export function saveLocale(locale: Locale): void {
+  if (typeof window !== "undefined") window.localStorage.setItem(storageKey, locale);
+}
+
+export function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "dark";
+  const saved = window.localStorage.getItem(themeStorageKey);
+  if (saved === "dark" || saved === "light") return saved;
+  return window.matchMedia?.("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
+
+export function saveTheme(theme: Theme): void {
+  if (typeof window !== "undefined") window.localStorage.setItem(themeStorageKey, theme);
+}
+
+export function translate(locale: Locale, key: MessageKey, values?: Record<string, string | number>): string {
+  const fallback = messages.en[key] ?? key;
+  const template = messages[locale][key] ?? fallback;
+  return template.replace(/\{(\w+)\}/g, (_, name: string) => String(values?.[name] ?? ""));
+}
+
+export type { MessageKey };
