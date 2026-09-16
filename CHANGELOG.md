@@ -1,6 +1,12 @@
 # Changelog
 
-## Fixed
+## [Unreleased]
+
+No unreleased changes.
+
+## [0.1.0] - 2026-09-16
+
+### Fixed
 
 - Prevented camera startup from hanging when `getUserMedia` or the MediaPipe Worker does not resolve; added timeouts, Worker error propagation, stream cleanup, and pinned the working MediaPipe WASM version.
 - Replaced click-to-recognize with continuous automatic detection, adopted MediaPipe's module-compatible Worker/WASM loading, and added landmark-based rock/paper/scissors fallback classification.
@@ -8,8 +14,6 @@
 - Replaced text-only battle cards with generated rock, paper, and scissors artwork, and made the energy counter reflect the actual remaining energy.
 - Added an energy-depleted guard that stops camera startup and stream capture, explains the rest/recovery path, and exposes MGM recovery actions when enabled. Mobile camera play now defaults to the rear camera with an in-game front/rear switch.
 - Camera facing constraints now prefer the requested lens without failing devices that expose only one camera; the switch is hidden while a round result is being revealed.
-
-## Unreleased
 
 ### Added
 
@@ -41,3 +45,9 @@
 - Official LINE account "new friend" policy, including previously blocked users, still needs campaign-owner confirmation before referral rewards are finalized.
 - Email recipient and consent policy still needs campaign-owner confirmation; missing email is currently represented as `skipped`.
 - Real iOS/Android camera permission and LIFF-browser testing still require physical devices or a device lab.
+
+### Verification
+
+- GitHub Pages deployment succeeded for commit `071f3b6`.
+- Public mobile smoke test verified rear-camera default, front/rear switching, automatic gesture play, zero-energy camera lock, stopped stream, and no horizontal overflow at 390px.
+- TypeScript check, production build, and 9 targeted regression tests passed.
