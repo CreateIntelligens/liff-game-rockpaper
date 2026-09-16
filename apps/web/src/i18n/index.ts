@@ -3,6 +3,10 @@ export type Theme = "dark" | "light";
 
 type MessageKey =
   | "brand"
+  | "browserGateTitle"
+  | "browserGateBody"
+  | "browserGateOpen"
+  | "browserGateManual"
   | "title"
   | "intro"
   | "loading"
@@ -84,6 +88,10 @@ type MessageKey =
 const messages: Record<Locale, Record<MessageKey, string>> = {
   "zh-TW": {
     brand: "猜拳挑戰 / LIFF",
+    browserGateTitle: "請改用 Safari 或 Chrome",
+    browserGateBody: "為了讓相機與手勢辨識穩定，這個遊戲不在 LINE 內建瀏覽器中執行。",
+    browserGateOpen: "在外部瀏覽器開啟",
+    browserGateManual: "如果按鈕沒有跳出，請點 LINE 右上角 ⋯，選擇「在瀏覽器中開啟」。",
     title: "猜拳挑戰",
     intro: "三點初始體力。相機辨識是主要玩法，替代出拳需要你的主動選擇。",
     loading: "載入活動設定中…",
@@ -164,6 +172,10 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
   },
   en: {
     brand: "ROCK PAPER / LIFF",
+    browserGateTitle: "Open in Safari or Chrome",
+    browserGateBody: "For reliable camera and gesture recognition, this game must run outside LINE's built-in browser.",
+    browserGateOpen: "Open in external browser",
+    browserGateManual: "If nothing opens, tap LINE's ⋯ menu and choose “Open in Browser.”",
     title: "Rock Paper Scissors",
     intro: "Start with three energy points. Camera recognition is the main play mode; fallback moves require your choice.",
     loading: "Loading campaign settings…",

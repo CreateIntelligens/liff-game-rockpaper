@@ -21,6 +21,12 @@ MediaPipe mapping:
 
 The model runs in a Web Worker. Camera frames stay in the browser. The backend remains authoritative for the game result, energy, rewards, and rankings.
 
+Camera compatibility policy:
+
+- The game blocks both the LIFF Browser and LINE's in-app browser for camera play and asks users to continue in Safari or Chrome.
+- To test the real LIFF environment, open the `https://liff.line.me/{LIFF_ID}` URL. Opening the endpoint URL directly from a LINE chat uses LINE's in-app browser instead.
+- GitHub Pages is a static demo with LIFF disabled; it is suitable for testing the public web flow, not LINE authentication or the production LIFF browser.
+
 ## Local development
 
 ```bash
@@ -105,6 +111,7 @@ Never expose server-only values through Vite, `/api/config`, logs, or committed 
 - Default three energy points; each accepted play consumes one point.
 - Camera play with MediaPipe Gesture Recognizer.
 - Camera failure fallback is separately opt-in and supports manual or backend-generated random moves.
+- LINE embedded-browser gate directs camera play to an external Safari or Chrome browser for more predictable WebView behavior.
 - MGM is globally configurable and requires member opt-in.
 - Invitation links are attributed during onboarding; referral rewards require a later verified eligibility event.
 - Masked invitation leaderboard and win leaderboard.

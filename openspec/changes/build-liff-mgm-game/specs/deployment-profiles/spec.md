@@ -32,3 +32,18 @@ Cloudflare profile SHALL 以 Wrangler 設定 Worker entrypoint、Static Assets�
 #### Scenario: Runtime adapter is replaced
 - **WHEN** 從 Docker profile 遷移到 Cloudflare profile
 - **THEN** 只替換 storage、mail queue、auth runtime 與 static serving adapters，核心遊戲規則與 API contract 保持不變
+
+### Requirement: LINE embedded browser camera policy
+相機猜拳 SHALL 不在 LINE LIFF Browser 或 LINE In-app Browser 中提供正式辨識流程；系統偵測到任一 LINE 內建環境時 SHALL 阻擋遊戲畫面並要求使用者改以外部 Safari／Chrome 開啟。一般外部瀏覽器與 GitHub Pages demo SHALL 維持其各自 profile 的行為。
+
+#### Scenario: LIFF Browser opens the game
+- **WHEN** 使用者在 LINE LIFF Browser 開啟活動
+- **THEN** 系統顯示外部瀏覽器提示，不啟動相機、不載入正式辨識流程，並提供開啟外部瀏覽器的動作
+
+#### Scenario: LINE In-app Browser opens the game
+- **WHEN** 使用者在 LINE In-app Browser 開啟活動 endpoint
+- **THEN** 系統顯示相同的外部瀏覽器提示，不讓使用者停留在 WebView 等待辨識
+
+#### Scenario: External browser opens the game
+- **WHEN** 使用者在 Safari 或 Chrome 開啟活動
+- **THEN** 系統允許依相機權限與活動規則進入相機或 opt-in fallback 流程

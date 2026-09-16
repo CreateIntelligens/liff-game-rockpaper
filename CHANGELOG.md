@@ -52,3 +52,4 @@ No unreleased changes.
 - Public mobile smoke test verified rear-camera default, front/rear switching, automatic gesture play, zero-energy camera lock, stopped stream, and no horizontal overflow at 390px.
 - TypeScript check, production build, and 9 targeted regression tests passed.
 - Desktop public layout measurement identified and reduced the oversized hero title top spacing from 8rem to 4rem; narrow and landscape layouts use tighter spacing.
+- Added a LINE embedded-browser gate for both LIFF Browser and LINE In-app Browser, with an external Safari/Chrome action and a manual LINE menu instruction.

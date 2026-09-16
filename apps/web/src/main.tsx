@@ -16,7 +16,7 @@ import {
   type Hand,
   type RoundOutcome,
 } from "./lib/api";
-import { initializeLiff } from "./lib/liff";
+import { initializeLiff, isLineEmbeddedBrowser, openExternalBrowser } from "./lib/liff";
 import { getInitialLocale, getInitialTheme, saveLocale, saveTheme, translate, type Locale, type Theme } from "./i18n";
 import { canStartGame } from "./gameplay/availability";
 import rockHand from "./assets/hands/rock.png";
@@ -41,6 +41,7 @@ function App() {
   const [theme, setTheme] = useState<Theme>(() => getInitialTheme());
   const [config, setConfig] = useState<PublicConfig | null>(null);
   const [authState, setAuthState] = useState<AuthState>("loading");
+  const [requiresExternalBrowser, setRequiresExternalBrowser] = useState(() => isLineEmbeddedBrowser());
   const [energy, setEnergy] = useState<number | null>(null);
   const [cameraState, setCameraState] = useState<CameraState>("idle");
   const [cameraFacing, setCameraFacing] = useState<CameraFacingMode>("environment");
@@ -85,12 +86,13 @@ function App() {
     void (async () => {
       try {
         const loadedConfig = await fetchPublicConfig();
-        const nextAuthState = await initializeLiff(loadedConfig);
+        const liffState = await initializeLiff(loadedConfig);
         if (!mounted) return;
         setConfig(loadedConfig);
-        setAuthState(nextAuthState === "authenticated" ? "authenticated" : "preview");
+        setRequiresExternalBrowser(liffState.requiresExternalBrowser);
+        setAuthState(liffState.state === "authenticated" ? "authenticated" : "preview");
         if (loadedConfig.demoMode) setEnergy(3);
-        if (nextAuthState === "authenticated") {
+        if (liffState.state === "authenticated") {
           setEnergy((await fetchMe()).energy);
           setMyRankings(await fetchMyRankings());
           if (loadedConfig.mgmEnabled) {
@@ -327,6 +329,24 @@ function App() {
   const resultLabel = result
     ? translate(locale, result === "win" ? "resultWin" : result === "lose" ? "resultLose" : "resultDraw")
     : null;
+
+  if (requiresExternalBrowser) {
+    const externalUrl = config && !config.demoMode ? config.publicBaseUrl : window.location.href;
+    return (
+      <main className="app-shell browser-gate">
+        <section className="browser-gate-panel" role="dialog" aria-labelledby="browser-gate-title">
+          <span className="browser-gate-mark" aria-hidden="true">OPEN</span>
+          <p className="browser-gate-kicker">{translate(locale, "brand")}</p>
+          <h1 id="browser-gate-title">{translate(locale, "browserGateTitle")}</h1>
+          <p>{translate(locale, "browserGateBody")}</p>
+          <button className="primary-button" type="button" onClick={() => openExternalBrowser(externalUrl, Boolean(config?.liffEnabled))}>
+            {translate(locale, "browserGateOpen")}
+          </button>
+          <p className="browser-gate-manual">{translate(locale, "browserGateManual")}</p>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="app-shell">

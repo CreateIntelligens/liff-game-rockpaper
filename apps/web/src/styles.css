@@ -58,6 +58,15 @@ body {
   background: radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--surface-soft) 78%, transparent), transparent 35%), var(--bg);
 }
 
+.browser-gate { display: grid; min-height: 100vh; align-content: center; }
+.browser-gate-panel { width: min(100%, 34rem); padding: clamp(1.5rem, 5vw, 3rem); border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
+.browser-gate-mark { display: grid; width: 3.5rem; height: 3.5rem; place-items: center; margin-bottom: 1.5rem; border: 1px solid var(--warm); border-radius: 50%; color: var(--warm); font-size: 0.65rem; font-weight: 800; letter-spacing: 0.08em; }
+.browser-gate-kicker { margin: 0; color: var(--accent); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.12em; }
+.browser-gate h1 { margin: 1rem 0 1rem; font-size: clamp(2.5rem, 10vw, 5rem); }
+.browser-gate-panel > p:not(.browser-gate-kicker):not(.browser-gate-manual) { color: var(--muted); line-height: 1.65; }
+.browser-gate-panel .primary-button { width: 100%; margin-top: 0.75rem; }
+.browser-gate-manual { margin: 1.25rem 0 0; color: var(--subtle); font-size: 0.9rem; line-height: 1.55; }
+
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
 .brand { color: var(--accent); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; }
 .locale-switcher, .theme-switcher { display: inline-flex; align-items: center; gap: 0.25rem; color: var(--subtle); }
