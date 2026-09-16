@@ -1,7 +1,7 @@
 import { StrictMode, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import type { PublicConfig } from "@rockpaper/config";
-import { CameraRecognizer } from "./camera/camera-recognizer";
+import { CameraRecognizer, type CameraFacingMode } from "./camera/camera-recognizer";
 import {
   fetchLeaderboard,
   fetchMe,
@@ -18,6 +18,7 @@ import {
 } from "./lib/api";
 import { initializeLiff } from "./lib/liff";
 import { getInitialLocale, getInitialTheme, saveLocale, saveTheme, translate, type Locale, type Theme } from "./i18n";
+import { canStartGame } from "./gameplay/availability";
 import rockHand from "./assets/hands/rock.png";
 import paperHand from "./assets/hands/paper.png";
 import scissorsHand from "./assets/hands/scissors.png";
@@ -42,6 +43,7 @@ function App() {
   const [authState, setAuthState] = useState<AuthState>("loading");
   const [energy, setEnergy] = useState<number | null>(null);
   const [cameraState, setCameraState] = useState<CameraState>("idle");
+  const [cameraFacing, setCameraFacing] = useState<CameraFacingMode>("environment");
   const [detectedHand, setDetectedHand] = useState<Hand | null>(null);
   const [modelFailed, setModelFailed] = useState(false);
   const [fallbackOptedIn, setFallbackOptedIn] = useState(false);
@@ -127,15 +129,20 @@ function App() {
           ? translate(locale, "preview")
           : translate(locale, "unavailable");
 
-  async function startCamera() {
+  async function openCamera(facingMode: CameraFacingMode) {
     if (!videoRef.current) return;
+    if (!canStartGame(energyRef.current)) {
+      setGameMessage(translate(locale, energyRef.current === 0 ? "energyEmpty" : "energyPreparing"));
+      return;
+    }
     setCameraState("starting");
     setModelFailed(false);
     setGameMessage(null);
     const camera = new CameraRecognizer();
     cameraRef.current = camera;
     try {
-      await camera.start(videoRef.current);
+      await camera.start(videoRef.current, facingMode);
+      setCameraFacing(facingMode);
       setCameraState("ready");
       void runAutomaticRecognition(camera, videoRef.current);
     } catch (error) {
@@ -154,6 +161,22 @@ function App() {
                 : "cameraDenied";
       setGameMessage(`${translate(locale, messageKey)} ${translate(locale, "cameraRetryHint")}`);
     }
+  }
+
+  async function startCamera() {
+    await openCamera(cameraFacing);
+  }
+
+  async function switchCamera() {
+    if (cameraState !== "ready" || !canStartGame(energyRef.current) || !videoRef.current) return;
+    const nextFacing: CameraFacingMode = cameraFacing === "environment" ? "user" : "environment";
+    recognitionRunRef.current += 1;
+    cameraRef.current?.stop(videoRef.current);
+    cameraRef.current = null;
+    setDetectedHand(null);
+    setModelFailed(false);
+    setGameMessage(null);
+    await openCamera(nextFacing);
   }
 
   function stopCamera() {
@@ -253,6 +276,12 @@ function App() {
       setDetectedHand(response.result.playerHand);
       setComputerPreview(response.result.hostHand);
       setRoundPhase("reveal");
+      if (response.energy <= 0) {
+        recognitionRunRef.current += 1;
+        cameraRef.current?.stop(videoRef.current ?? undefined);
+        cameraRef.current = null;
+        setCameraState("idle");
+      }
     } catch (error) {
       window.clearInterval(previewTimer);
       setRoundPhase("scanning");
@@ -271,6 +300,7 @@ function App() {
     setResult(null);
     setDetectedHand(null);
     setGameMessage(null);
+    if (!canStartGame(energyRef.current)) return;
     if (cameraRef.current && videoRef.current) {
       void runAutomaticRecognition(cameraRef.current, videoRef.current);
     }
@@ -335,9 +365,29 @@ function App() {
           </div>
 
           <div className="camera-stage">
-            <video ref={videoRef} className="camera-preview" autoPlay playsInline muted aria-label={translate(locale, "cameraReady")} />
-            {cameraState === "idle" && <span className="camera-placeholder">{translate(locale, "cameraPrompt")}</span>}
+            <video ref={videoRef} className={`camera-preview camera-${cameraFacing}`} autoPlay playsInline muted aria-label={translate(locale, "cameraReady")} />
+            {cameraState === "idle" && energy !== 0 && <span className="camera-placeholder">{translate(locale, "cameraPrompt")}</span>}
             {cameraState === "starting" && <span className="camera-placeholder">{translate(locale, "cameraStarting")}</span>}
+            {energy === 0 && roundPhase === "scanning" && (
+              <div className="energy-empty-state" role="status" aria-live="polite">
+                <span className="energy-empty-mark" aria-hidden="true">0</span>
+                <div>
+                  <strong>{translate(locale, "energyEmptyTitle")}</strong>
+                  <p>{translate(locale, "energyRestHint")}</p>
+                  {config?.mgmEnabled && authState === "authenticated" && (
+                    mgmOptedIn && inviteUrl ? (
+                      <button className="energy-invite-button" type="button" onClick={() => void copyInviteLink()}>
+                        {linkCopied ? translate(locale, "linkCopied") : translate(locale, "energyInviteNow")}
+                      </button>
+                    ) : (
+                      <button className="energy-invite-button" type="button" onClick={() => void joinMgm()}>
+                        {translate(locale, "energyInviteOptIn")}
+                      </button>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
             {cameraState === "ready" && roundPhase === "scanning" && (
               <span className="camera-detection-status">
                 {detectedHand
@@ -365,7 +415,7 @@ function App() {
                     <>
                       <b className="battle-result-title">{resultLabel}</b>
                       <button className="battle-again" type="button" onClick={startNextRound}>
-                        {translate(locale, "battleAgain")}
+                        {energy === 0 ? translate(locale, "energyViewOptions") : translate(locale, "battleAgain")}
                       </button>
                     </>
                   )}
@@ -386,10 +436,15 @@ function App() {
               className="primary-button"
               type="button"
               onClick={() => cameraState === "ready" ? stopCamera() : void startCamera()}
-              disabled={cameraState === "starting"}
+              disabled={cameraState === "starting" || energy === null || energy === 0}
             >
-              {cameraState === "ready" ? translate(locale, "cameraStop") : translate(locale, "cameraStart")}
+              {energy === 0 ? translate(locale, "energyEmptyButton") : cameraState === "ready" ? translate(locale, "cameraStop") : translate(locale, "cameraStart")}
             </button>
+            {cameraState === "ready" && (
+              <button className="secondary-button" type="button" onClick={() => void switchCamera()}>
+                {cameraFacing === "environment" ? translate(locale, "cameraSwitchToFront") : translate(locale, "cameraSwitchToRear")}
+              </button>
+            )}
           </div>
 
           {config?.cameraFallbackEnabled && (cameraState === "failed" || modelFailed) && !fallbackOptedIn && (

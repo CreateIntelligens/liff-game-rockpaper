@@ -6,6 +6,15 @@ type RecognitionMessage =
   | { type: "result"; hand: CameraRecognitionResult["hand"]; confidence: number; modelVersion: string }
   | { type: "error"; message: string };
 
+export type CameraFacingMode = "user" | "environment";
+
+export function createCameraConstraints(facingMode: CameraFacingMode = "environment"): MediaStreamConstraints {
+  return {
+    video: { facingMode, width: { ideal: 720 }, height: { ideal: 720 } },
+    audio: false,
+  };
+}
+
 export class CameraRecognizer {
   private readonly worker: Worker;
   private stream: MediaStream | null = null;
@@ -21,8 +30,8 @@ export class CameraRecognizer {
     this.worker = new Worker(new URL("./gesture-worker.ts", import.meta.url), { type: "module" });
   }
 
-  async start(video: HTMLVideoElement): Promise<void> {
-    this.stream = await this.requestCameraStream();
+  async start(video: HTMLVideoElement, facingMode: CameraFacingMode = "environment"): Promise<void> {
+    this.stream = await this.requestCameraStream(facingMode);
     video.srcObject = this.stream;
     await video.play();
     this.modelInit = new Promise<void>((resolve) => {
@@ -61,12 +70,9 @@ export class CameraRecognizer {
     });
   }
 
-  private async requestCameraStream(): Promise<MediaStream> {
+  private async requestCameraStream(facingMode: CameraFacingMode): Promise<MediaStream> {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error("CAMERA_UNSUPPORTED");
-    const constraints: MediaStreamConstraints = {
-      video: { facingMode: "user", width: { ideal: 720 }, height: { ideal: 720 } },
-      audio: false,
-    };
+    const constraints = createCameraConstraints(facingMode);
     return new Promise<MediaStream>((resolve, reject) => {
       let settled = false;
       const timeout = window.setTimeout(() => {

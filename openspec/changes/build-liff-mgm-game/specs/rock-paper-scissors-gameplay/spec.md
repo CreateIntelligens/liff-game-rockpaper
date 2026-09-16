@@ -17,7 +17,18 @@
 
 #### Scenario: No energy blocks play
 - **WHEN** 會員體力為 0
-- **THEN** 系統拒絕開始正式猜拳，且不建立結果、不扣除體力
+- **THEN** 系統拒絕開始正式猜拳，不啟動相機或替代出拳，不建立結果、不扣除體力，並顯示休息／補充體力的下一步
+
+#### Scenario: Energy reaches zero after a play
+- **WHEN** 一局正式猜拳完成後會員體力變為 0
+- **THEN** 系統停止相機串流，保留本局結果，並提供查看休息或有效邀請補充體力的入口
+
+### Requirement: Mobile camera facing selection
+手機遊玩 SHALL 預設請求後鏡頭以拍攝手勢；相機準備完成後 SHALL 提供前鏡頭與後鏡頭切換，且切換失敗不得遺留未停止的相機串流。
+
+#### Scenario: Member switches camera facing
+- **WHEN** 會員在相機運行中選擇切換鏡頭
+- **THEN** 系統停止原串流、以另一個 facing mode 重新啟動辨識，並更新預覽方向
 
 ### Requirement: Server-authoritative game result
 正式輸贏、玩家手勢、主持人手勢、體力變更與抽獎資格 SHALL 由後端以目前活動規則判定；前端傳入的結果或獎勵數值 SHALL NOT 被直接採用。

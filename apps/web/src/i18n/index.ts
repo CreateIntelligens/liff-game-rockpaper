@@ -20,6 +20,9 @@ type MessageKey =
   | "cameraStarting"
   | "cameraReady"
   | "cameraStop"
+  | "cameraSwitchToFront"
+  | "cameraSwitchToRear"
+  | "energyEmptyButton"
   | "cameraScanning"
   | "cameraDetected"
   | "gestureModelUnavailable"
@@ -59,6 +62,11 @@ type MessageKey =
   | "errorRetry"
   | "cameraUnknown"
   | "energyEmpty"
+  | "energyEmptyTitle"
+  | "energyRestHint"
+  | "energyInviteNow"
+  | "energyInviteOptIn"
+  | "energyViewOptions"
   | "fallbackDisabled"
   | "cameraPrompt"
   | "leaderboardEmpty"
@@ -92,6 +100,9 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     cameraStarting: "啟動相機中…",
     cameraReady: "相機已準備好",
     cameraStop: "停止相機",
+    cameraSwitchToFront: "切換前鏡頭",
+    cameraSwitchToRear: "切換後鏡頭",
+    energyEmptyButton: "體力已用完",
     cameraScanning: "自動偵測中…",
     cameraDetected: "已偵測：{hand}",
     gestureModelUnavailable: "手勢模型載入失敗，相機仍可使用；請改用替代出拳。",
@@ -131,6 +142,11 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     errorRetry: "發生問題，請再試一次。",
     cameraUnknown: "沒有辨識到穩定手勢，請調整後再試。",
     energyEmpty: "體力不足，請透過有效邀請補充體力。",
+    energyEmptyTitle: "體力已用完",
+    energyRestHint: "請依活動規則休息一段時間後再回來；也可以立即邀請好友補充體力。",
+    energyInviteNow: "立即邀請好友補充體力",
+    energyInviteOptIn: "先同意會員邀請",
+    energyViewOptions: "查看補充方式",
     fallbackDisabled: "替代出拳目前未啟用。",
     cameraPrompt: "把一隻手放進框內",
     leaderboardEmpty: "目前還沒有排名資料",
@@ -163,6 +179,9 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     cameraStarting: "Starting camera…",
     cameraReady: "Camera is ready",
     cameraStop: "Stop camera",
+    cameraSwitchToFront: "Switch to front camera",
+    cameraSwitchToRear: "Switch to rear camera",
+    energyEmptyButton: "Out of energy",
     cameraScanning: "Detecting automatically…",
     cameraDetected: "Detected: {hand}",
     gestureModelUnavailable: "The gesture model failed to load. The camera still works; use a fallback move.",
@@ -202,6 +221,11 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     errorRetry: "Something went wrong. Please try again.",
     cameraUnknown: "No stable gesture detected. Adjust your hand and try again.",
     energyEmpty: "You are out of energy. Invite a valid member to regain energy.",
+    energyEmptyTitle: "You are out of energy",
+    energyRestHint: "Take a break and return when the campaign allows recovery; or invite a friend to regain energy now.",
+    energyInviteNow: "Invite a friend to regain energy",
+    energyInviteOptIn: "Join member referrals first",
+    energyViewOptions: "See ways to regain energy",
     fallbackDisabled: "Fallback moves are not enabled.",
     cameraPrompt: "Place one hand inside the frame",
     leaderboardEmpty: "No ranking data yet",

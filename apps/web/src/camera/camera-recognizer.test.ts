@@ -1,5 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { normalizeCameraError } from "./camera-recognizer";
+import { createCameraConstraints, normalizeCameraError } from "./camera-recognizer";
+
+describe("camera constraints", () => {
+  it("defaults to the rear-facing camera for mobile play", () => {
+    expect(createCameraConstraints()).toMatchObject({
+      video: { facingMode: "environment" },
+      audio: false,
+    });
+  });
+
+  it("can explicitly request the front-facing camera", () => {
+    expect(createCameraConstraints("user").video).toMatchObject({ facingMode: "user" });
+  });
+});
 
 describe("camera error classification", () => {
   it.each([
