@@ -32,6 +32,8 @@ function App() {
   const [authState, setAuthState] = useState<AuthState>("loading");
   const [energy, setEnergy] = useState<number | null>(null);
   const [cameraState, setCameraState] = useState<CameraState>("idle");
+  const [detectedHand, setDetectedHand] = useState<Hand | null>(null);
+  const [modelFailed, setModelFailed] = useState(false);
   const [fallbackOptedIn, setFallbackOptedIn] = useState(false);
   const [gameMessage, setGameMessage] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
@@ -44,6 +46,9 @@ function App() {
   const [myRankings, setMyRankings] = useState<Awaited<ReturnType<typeof fetchMyRankings>> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cameraRef = useRef<CameraRecognizer | null>(null);
+  const recognitionRunRef = useRef(0);
+  const submittingRef = useRef(false);
+  const energyRef = useRef<number | null>(null);
 
   useEffect(() => {
     saveLocale(locale);
@@ -54,6 +59,10 @@ function App() {
     saveTheme(theme);
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    energyRef.current = energy;
+  }, [energy]);
 
   useEffect(() => {
     let mounted = true;
@@ -84,6 +93,7 @@ function App() {
 
     return () => {
       mounted = false;
+      recognitionRunRef.current += 1;
       cameraRef.current?.stop(videoRef.current ?? undefined);
     };
   }, []);
@@ -106,12 +116,14 @@ function App() {
   async function startCamera() {
     if (!videoRef.current) return;
     setCameraState("starting");
+    setModelFailed(false);
     setGameMessage(null);
     const camera = new CameraRecognizer();
     cameraRef.current = camera;
     try {
       await camera.start(videoRef.current);
       setCameraState("ready");
+      void runAutomaticRecognition(camera, videoRef.current);
     } catch (error) {
       cameraRef.current?.stop(videoRef.current);
       cameraRef.current = null;
@@ -130,6 +142,51 @@ function App() {
     }
   }
 
+  function stopCamera() {
+    recognitionRunRef.current += 1;
+    cameraRef.current?.stop(videoRef.current ?? undefined);
+    cameraRef.current = null;
+    setCameraState("idle");
+    setDetectedHand(null);
+    setModelFailed(false);
+    setGameMessage(null);
+  }
+
+  async function runAutomaticRecognition(camera: CameraRecognizer, video: HTMLVideoElement) {
+    const runId = ++recognitionRunRef.current;
+    let armed = true;
+    let unknownCount = 0;
+    while (recognitionRunRef.current === runId && cameraRef.current === camera) {
+      try {
+        const recognition = await camera.recognizeStable(video);
+        if (recognition.hand === "unknown") {
+          unknownCount += 1;
+          if (unknownCount >= 2) {
+            armed = true;
+            setDetectedHand(null);
+          }
+          await new Promise((resolve) => window.setTimeout(resolve, 120));
+          continue;
+        }
+
+        unknownCount = 0;
+        setDetectedHand(recognition.hand);
+        if (armed && !submittingRef.current && (energyRef.current ?? 0) > 0) {
+          armed = false;
+          submittingRef.current = true;
+          await submitGame("camera", recognition.hand);
+          submittingRef.current = false;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 180));
+      } catch (error) {
+        console.warn("gesture-model-unavailable", error);
+        setModelFailed(true);
+        setGameMessage(translate(locale, "gestureModelUnavailable"));
+        return;
+      }
+    }
+  }
+
   async function submitGame(mode: "camera" | "manual" | "random", playerHand?: Hand) {
     if (authState !== "authenticated" && !config?.demoMode) {
       setGameMessage(translate(locale, "gameLockedPreview"));
@@ -141,16 +198,20 @@ function App() {
     try {
       if (config?.demoMode) {
         const response = playDemoGame({ mode, playerHand });
-        if ((energy ?? 0) <= 0) {
+        const currentEnergy = energyRef.current ?? 0;
+        if (currentEnergy <= 0) {
           setGameMessage(translate(locale, "energyEmpty"));
           return;
         }
-        setEnergy((current) => Math.max(0, (current ?? 3) - 1));
+        const nextEnergy = Math.max(0, currentEnergy - 1);
+        energyRef.current = nextEnergy;
+        setEnergy(nextEnergy);
         setResult(response.result);
         setGameMessage(null);
         return;
       }
       const response = await playGame({ requestId: crypto.randomUUID(), mode, playerHand });
+      energyRef.current = response.energy;
       setEnergy(response.energy);
       setResult(response.result.result);
       setGameMessage(null);
@@ -159,20 +220,6 @@ function App() {
       setGameMessage(
         translate(locale, code === "INSUFFICIENT_ENERGY" ? "energyEmpty" : code === "FALLBACK_DISABLED" ? "fallbackDisabled" : "errorRetry"),
       );
-    }
-  }
-
-  async function recognizeCamera() {
-    if (!cameraRef.current || !videoRef.current) return;
-    try {
-      const recognition = await cameraRef.current.recognizeStable(videoRef.current);
-      if (recognition.hand === "unknown") {
-        setGameMessage(translate(locale, "cameraUnknown"));
-        return;
-      }
-      await submitGame("camera", recognition.hand);
-    } catch {
-      setGameMessage(translate(locale, "errorRetry"));
     }
   }
 
@@ -238,20 +285,27 @@ function App() {
             <video ref={videoRef} className="camera-preview" autoPlay playsInline muted aria-label={translate(locale, "cameraReady")} />
             {cameraState === "idle" && <span className="camera-placeholder">{translate(locale, "cameraPrompt")}</span>}
             {cameraState === "starting" && <span className="camera-placeholder">{translate(locale, "cameraStarting")}</span>}
-          </div>
-
-          <div className="action-row">
-            <button className="primary-button" type="button" onClick={() => void startCamera()} disabled={cameraState === "starting"}>
-              {cameraState === "ready" ? translate(locale, "cameraReady") : translate(locale, "cameraStart")}
-            </button>
             {cameraState === "ready" && (
-              <button className="secondary-button" type="button" onClick={() => void recognizeCamera()}>
-                {translate(locale, "recognize")}
-              </button>
+              <span className="camera-detection-status">
+                {detectedHand
+                  ? translate(locale, "cameraDetected", { hand: translate(locale, detectedHand) })
+                  : translate(locale, "cameraScanning")}
+              </span>
             )}
           </div>
 
-          {config?.cameraFallbackEnabled && (cameraState === "failed" || config.demoMode) && !fallbackOptedIn && (
+          <div className="action-row">
+            <button
+              className="primary-button"
+              type="button"
+              onClick={() => cameraState === "ready" ? stopCamera() : void startCamera()}
+              disabled={cameraState === "starting"}
+            >
+              {cameraState === "ready" ? translate(locale, "cameraStop") : translate(locale, "cameraStart")}
+            </button>
+          </div>
+
+          {config?.cameraFallbackEnabled && (cameraState === "failed" || modelFailed || config.demoMode) && !fallbackOptedIn && (
             <div className="fallback-consent">
               <p>{translate(locale, "fallbackOffer")}</p>
               <button className="secondary-button" type="button" onClick={() => setFallbackOptedIn(true)}>

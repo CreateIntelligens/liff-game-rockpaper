@@ -15,7 +15,7 @@ export class CameraRecognizer {
 
   constructor(
     private readonly modelPath = `${import.meta.env.BASE_URL}models/gesture_recognizer.task`,
-    private readonly wasmPath = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm",
+    private readonly wasmPath = `${import.meta.env.BASE_URL}wasm`,
     private readonly modelVersion = "v1",
   ) {
     this.worker = new Worker(new URL("./gesture-worker.ts", import.meta.url), { type: "module" });
@@ -129,7 +129,7 @@ export class CameraRecognizer {
     });
   }
 
-  async recognizeStable(video: HTMLVideoElement, frames = 3): Promise<CameraRecognitionResult> {
+  async recognizeStable(video: HTMLVideoElement, frames = 2): Promise<CameraRecognitionResult> {
     let history: CameraRecognitionResult["hand"][] = [];
     let latest: CameraRecognitionResult = { hand: "unknown", confidence: 0, modelVersion: this.modelVersion };
     for (let index = 0; index < frames; index += 1) {

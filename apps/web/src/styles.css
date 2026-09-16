@@ -87,6 +87,7 @@ h1 { max-width: 9ch; margin: clamp(4rem, 15vw, 8rem) 0 1.25rem; font-size: clamp
 .camera-stage::before { position: absolute; inset: 0.35rem; z-index: 1; content: ""; pointer-events: none; background: url("./assets/frame.svg") center / 100% 100% no-repeat; opacity: 0.7; }
 .camera-preview { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 .camera-placeholder { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 1rem; color: var(--subtle); text-align: center; }
+.camera-detection-status { position: absolute; right: 0.75rem; bottom: 0.75rem; z-index: 3; max-width: calc(100% - 1.5rem); padding: 0.45rem 0.7rem; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); background: color-mix(in srgb, var(--surface) 88%, transparent); font-size: 0.8rem; font-weight: 800; }
 .action-row, .hand-row { display: grid; grid-template-columns: 1fr; gap: 0.65rem; margin-top: 0.85rem; }
 button { font: inherit; }
 .primary-button, .secondary-button, .hand-button, .text-button { min-height: 2.9rem; border-radius: 0.75rem; cursor: pointer; }
@@ -131,7 +132,7 @@ button { font: inherit; }
   .app-shell { padding-top: 2rem; }
   .intro { font-size: 1.1rem; }
   .status-card { padding: 1.25rem; }
-  .action-row, .hand-row { grid-template-columns: repeat(3, 1fr); }
+  .hand-row { grid-template-columns: repeat(3, 1fr); }
   .invite-link-row { grid-template-columns: 1fr auto; }
 }
 

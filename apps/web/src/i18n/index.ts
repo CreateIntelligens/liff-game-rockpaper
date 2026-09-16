@@ -19,6 +19,10 @@ type MessageKey =
   | "cameraStart"
   | "cameraStarting"
   | "cameraReady"
+  | "cameraStop"
+  | "cameraScanning"
+  | "cameraDetected"
+  | "gestureModelUnavailable"
   | "cameraDenied"
   | "cameraPermissionDenied"
   | "cameraMissing"
@@ -83,6 +87,10 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     cameraStart: "啟用相機辨識",
     cameraStarting: "啟動相機中…",
     cameraReady: "相機已準備好",
+    cameraStop: "停止相機",
+    cameraScanning: "自動偵測中…",
+    cameraDetected: "已偵測：{hand}",
+    gestureModelUnavailable: "手勢模型載入失敗，相機仍可使用；請改用替代出拳。",
     cameraDenied: "無法使用相機，請選擇替代方式。",
     cameraPermissionDenied: "相機權限被拒絕，請到瀏覽器設定允許相機後再試。",
     cameraMissing: "找不到可用相機，請確認裝置有相機。",
@@ -146,6 +154,10 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     cameraStart: "Enable camera recognition",
     cameraStarting: "Starting camera…",
     cameraReady: "Camera is ready",
+    cameraStop: "Stop camera",
+    cameraScanning: "Detecting automatically…",
+    cameraDetected: "Detected: {hand}",
+    gestureModelUnavailable: "The gesture model failed to load. The camera still works; use a fallback move.",
     cameraDenied: "Camera is unavailable. Choose a fallback move.",
     cameraPermissionDenied: "Camera permission was denied. Allow camera access in browser settings and try again.",
     cameraMissing: "No usable camera was found on this device.",

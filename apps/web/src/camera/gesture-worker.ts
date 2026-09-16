@@ -1,5 +1,6 @@
 import { FilesetResolver, GestureRecognizer } from "@mediapipe/tasks-vision";
 import { mapGestureCategory } from "./gesture-mapper";
+import { classifyRpsLandmarks } from "./landmark-classifier";
 
 type InitMessage = { type: "init"; modelPath: string; wasmPath: string; modelVersion: string };
 type FrameMessage = { type: "frame"; bitmap: ImageBitmap; timestamp: number };
@@ -11,7 +12,7 @@ let modelVersion = "unknown";
 self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
   try {
     if (event.data.type === "init") {
-      const vision = await FilesetResolver.forVisionTasks(event.data.wasmPath);
+      const vision = await FilesetResolver.forVisionTasks(event.data.wasmPath, true);
       recognizer = await GestureRecognizer.createFromOptions(vision, {
         baseOptions: { modelAssetPath: event.data.modelPath },
         runningMode: "VIDEO",
@@ -37,9 +38,13 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
     const handCount = result.landmarks.length;
     const category = handCount === 1 ? result.gestures[0]?.[0] : undefined;
     const confidence = category?.score ?? 0;
+    const cannedHand = handCount === 1 ? mapGestureCategory(category?.categoryName, confidence) : "unknown";
+    const landmarkHand = handCount === 1 ? classifyRpsLandmarks(result.landmarks[0]) : "unknown";
     self.postMessage({
       type: "result",
-      hand: handCount === 1 ? mapGestureCategory(category?.categoryName, confidence) : "unknown",
+      hand: cannedHand === "unknown" && handCount === 1
+        ? landmarkHand
+        : cannedHand,
       confidence,
       modelVersion,
     });
