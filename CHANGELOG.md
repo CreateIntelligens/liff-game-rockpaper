@@ -7,6 +7,7 @@
 - Added a locked round state, computer-hand shuffle, 3-2-1 reveal, in-camera win/lose/draw overlay, and explicit “play again” control so one detected gesture creates exactly one round.
 - Replaced text-only battle cards with generated rock, paper, and scissors artwork, and made the energy counter reflect the actual remaining energy.
 - Added an energy-depleted guard that stops camera startup and stream capture, explains the rest/recovery path, and exposes MGM recovery actions when enabled. Mobile camera play now defaults to the rear camera with an in-game front/rear switch.
+- Camera facing constraints now prefer the requested lens without failing devices that expose only one camera; the switch is hidden while a round result is being revealed.
 
 ## Unreleased
 

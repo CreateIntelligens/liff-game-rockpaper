@@ -168,7 +168,7 @@ function App() {
   }
 
   async function switchCamera() {
-    if (cameraState !== "ready" || !canStartGame(energyRef.current) || !videoRef.current) return;
+    if (cameraState !== "ready" || roundPhase !== "scanning" || !canStartGame(energyRef.current) || !videoRef.current) return;
     const nextFacing: CameraFacingMode = cameraFacing === "environment" ? "user" : "environment";
     recognitionRunRef.current += 1;
     cameraRef.current?.stop(videoRef.current);
@@ -373,7 +373,7 @@ function App() {
                 <span className="energy-empty-mark" aria-hidden="true">0</span>
                 <div>
                   <strong>{translate(locale, "energyEmptyTitle")}</strong>
-                  <p>{translate(locale, "energyRestHint")}</p>
+                  <p>{translate(locale, config?.mgmEnabled && authState === "authenticated" ? "energyRestHint" : "energyRestOnlyHint")}</p>
                   {config?.mgmEnabled && authState === "authenticated" && (
                     mgmOptedIn && inviteUrl ? (
                       <button className="energy-invite-button" type="button" onClick={() => void copyInviteLink()}>
@@ -440,7 +440,7 @@ function App() {
             >
               {energy === 0 ? translate(locale, "energyEmptyButton") : cameraState === "ready" ? translate(locale, "cameraStop") : translate(locale, "cameraStart")}
             </button>
-            {cameraState === "ready" && (
+            {cameraState === "ready" && roundPhase === "scanning" && (
               <button className="secondary-button" type="button" onClick={() => void switchCamera()}>
                 {cameraFacing === "environment" ? translate(locale, "cameraSwitchToFront") : translate(locale, "cameraSwitchToRear")}
               </button>

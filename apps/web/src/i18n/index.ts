@@ -64,6 +64,7 @@ type MessageKey =
   | "energyEmpty"
   | "energyEmptyTitle"
   | "energyRestHint"
+  | "energyRestOnlyHint"
   | "energyInviteNow"
   | "energyInviteOptIn"
   | "energyViewOptions"
@@ -144,6 +145,7 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     energyEmpty: "體力不足，請透過有效邀請補充體力。",
     energyEmptyTitle: "體力已用完",
     energyRestHint: "請依活動規則休息一段時間後再回來；也可以立即邀請好友補充體力。",
+    energyRestOnlyHint: "請依活動規則休息一段時間後再回來。",
     energyInviteNow: "立即邀請好友補充體力",
     energyInviteOptIn: "先同意會員邀請",
     energyViewOptions: "查看補充方式",
@@ -223,6 +225,7 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     energyEmpty: "You are out of energy. Invite a valid member to regain energy.",
     energyEmptyTitle: "You are out of energy",
     energyRestHint: "Take a break and return when the campaign allows recovery; or invite a friend to regain energy now.",
+    energyRestOnlyHint: "Take a break and return when the campaign allows recovery.",
     energyInviteNow: "Invite a friend to regain energy",
     energyInviteOptIn: "Join member referrals first",
     energyViewOptions: "See ways to regain energy",

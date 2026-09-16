@@ -10,7 +10,7 @@ export type CameraFacingMode = "user" | "environment";
 
 export function createCameraConstraints(facingMode: CameraFacingMode = "environment"): MediaStreamConstraints {
   return {
-    video: { facingMode, width: { ideal: 720 }, height: { ideal: 720 } },
+    video: { facingMode: { ideal: facingMode }, width: { ideal: 720 }, height: { ideal: 720 } },
     audio: false,
   };
 }

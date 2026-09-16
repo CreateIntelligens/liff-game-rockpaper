@@ -4,13 +4,13 @@ import { createCameraConstraints, normalizeCameraError } from "./camera-recogniz
 describe("camera constraints", () => {
   it("defaults to the rear-facing camera for mobile play", () => {
     expect(createCameraConstraints()).toMatchObject({
-      video: { facingMode: "environment" },
+      video: { facingMode: { ideal: "environment" } },
       audio: false,
     });
   });
 
   it("can explicitly request the front-facing camera", () => {
-    expect(createCameraConstraints("user").video).toMatchObject({ facingMode: "user" });
+    expect(createCameraConstraints("user").video).toMatchObject({ facingMode: { ideal: "user" } });
   });
 });
 
