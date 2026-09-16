@@ -9,6 +9,9 @@ type RecognitionMessage =
 export class CameraRecognizer {
   private readonly worker: Worker;
   private stream: MediaStream | null = null;
+  private modelReady = false;
+  private modelError: Error | null = null;
+  private modelInit: Promise<void> | null = null;
 
   constructor(
     private readonly modelPath = `${import.meta.env.BASE_URL}models/gesture_recognizer.task`,
@@ -22,31 +25,35 @@ export class CameraRecognizer {
     this.stream = await this.requestCameraStream();
     video.srcObject = this.stream;
     await video.play();
-    await new Promise<void>((resolve, reject) => {
+    this.modelInit = new Promise<void>((resolve) => {
       const timeout = window.setTimeout(() => {
         this.worker.removeEventListener("message", onMessage);
         this.worker.removeEventListener("error", onError);
-        reject(new Error("GESTURE_RECOGNIZER_TIMEOUT"));
+        this.modelError = new Error("GESTURE_RECOGNIZER_TIMEOUT");
+        resolve();
       }, 15_000);
       const onMessage = (event: MessageEvent<RecognitionMessage>) => {
         if (event.data.type === "ready") {
           this.worker.removeEventListener("message", onMessage);
           this.worker.removeEventListener("error", onError);
           window.clearTimeout(timeout);
+          this.modelReady = true;
           resolve();
         }
         if (event.data.type === "error") {
           this.worker.removeEventListener("message", onMessage);
           this.worker.removeEventListener("error", onError);
           window.clearTimeout(timeout);
-          reject(new Error(event.data.message));
+          this.modelError = new Error(event.data.message);
+          resolve();
         }
       };
       const onError = () => {
         this.worker.removeEventListener("message", onMessage);
         this.worker.removeEventListener("error", onError);
         window.clearTimeout(timeout);
-        reject(new Error("GESTURE_RECOGNIZER_WORKER_FAILED"));
+        this.modelError = new Error("GESTURE_RECOGNIZER_WORKER_FAILED");
+        resolve();
       };
       this.worker.addEventListener("message", onMessage);
       this.worker.addEventListener("error", onError);
@@ -80,13 +87,15 @@ export class CameraRecognizer {
           if (settled) return;
           settled = true;
           window.clearTimeout(timeout);
-          reject(error instanceof Error ? error : new Error("CAMERA_ACCESS_FAILED"));
+          reject(normalizeCameraError(error));
         },
       );
     });
   }
 
   async recognize(video: HTMLVideoElement, timestamp = performance.now()): Promise<CameraRecognitionResult> {
+    if (this.modelInit) await this.modelInit;
+    if (!this.modelReady) throw this.modelError ?? new Error("GESTURE_RECOGNIZER_NOT_READY");
     const bitmap = await createImageBitmap(video);
     return new Promise((resolve, reject) => {
       const timeout = window.setTimeout(() => {
@@ -139,4 +148,12 @@ export class CameraRecognizer {
     if (video) video.srcObject = null;
     this.worker.terminate();
   }
+}
+
+export function normalizeCameraError(error: unknown): Error {
+  const name = error instanceof DOMException ? error.name : error instanceof Error ? error.name : "";
+  if (name === "NotAllowedError" || name === "SecurityError") return new Error("CAMERA_PERMISSION_DENIED");
+  if (name === "NotFoundError" || name === "OverconstrainedError") return new Error("CAMERA_MISSING");
+  if (name === "NotReadableError" || name === "AbortError") return new Error("CAMERA_BUSY");
+  return error instanceof Error ? error : new Error("CAMERA_ACCESS_FAILED");
 }

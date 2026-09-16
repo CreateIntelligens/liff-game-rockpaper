@@ -20,6 +20,11 @@ type MessageKey =
   | "cameraStarting"
   | "cameraReady"
   | "cameraDenied"
+  | "cameraPermissionDenied"
+  | "cameraMissing"
+  | "cameraBusy"
+  | "cameraTimeout"
+  | "cameraRetryHint"
   | "recognize"
   | "fallbackOffer"
   | "fallbackOptIn"
@@ -79,6 +84,11 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     cameraStarting: "啟動相機中…",
     cameraReady: "相機已準備好",
     cameraDenied: "無法使用相機，請選擇替代方式。",
+    cameraPermissionDenied: "相機權限被拒絕，請到瀏覽器設定允許相機後再試。",
+    cameraMissing: "找不到可用相機，請確認裝置有相機。",
+    cameraBusy: "相機目前被其他程式使用，請關閉後再試。",
+    cameraTimeout: "相機權限等待逾時，請重新整理或改用替代方式。",
+    cameraRetryHint: "若你在 LINE 內建瀏覽器，請改用 LIFF 連結或 Safari／Chrome 開啟。",
     recognize: "辨識手勢",
     fallbackOffer: "要使用替代出拳嗎？",
     fallbackOptIn: "我同意使用替代出拳",
@@ -137,6 +147,11 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     cameraStarting: "Starting camera…",
     cameraReady: "Camera is ready",
     cameraDenied: "Camera is unavailable. Choose a fallback move.",
+    cameraPermissionDenied: "Camera permission was denied. Allow camera access in browser settings and try again.",
+    cameraMissing: "No usable camera was found on this device.",
+    cameraBusy: "The camera is being used by another app. Close it and try again.",
+    cameraTimeout: "The camera permission request timed out. Reload or use a fallback move.",
+    cameraRetryHint: "If you are in LINE's in-app browser, open the LIFF URL or use Safari/Chrome.",
     recognize: "Recognize hand",
     fallbackOffer: "Use a fallback move?",
     fallbackOptIn: "I agree to use fallback moves",

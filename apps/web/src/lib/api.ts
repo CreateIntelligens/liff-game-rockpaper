@@ -17,6 +17,7 @@ const demoConfig: PublicConfig = {
 };
 
 export async function fetchPublicConfig(): Promise<PublicConfig> {
+  if (import.meta.env.VITE_DEMO_MODE === "true") return demoConfig;
   try {
     const response = await fetch("/api/config", { credentials: "include" });
     if (!response.ok) throw new Error("CONFIG_LOAD_FAILED");
@@ -70,6 +71,7 @@ export function playDemoGame(input: { mode: "camera" | "manual" | "random"; play
 }
 
 export async function fetchLeaderboard(type: "invitations" | "wins") {
+  if (import.meta.env.VITE_DEMO_MODE === "true") return { entries: [] };
   const response = await fetch(`/api/leaderboards/${type}`, { credentials: "include" });
   if (!response.ok) throw new Error("LEADERBOARD_FAILED");
   return (await response.json()) as { entries: Array<{ rank: number; score: number; maskedName: string }> };

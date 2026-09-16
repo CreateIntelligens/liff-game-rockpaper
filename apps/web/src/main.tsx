@@ -112,11 +112,21 @@ function App() {
     try {
       await camera.start(videoRef.current);
       setCameraState("ready");
-    } catch {
+    } catch (error) {
       cameraRef.current?.stop(videoRef.current);
       cameraRef.current = null;
       setCameraState("failed");
-      setGameMessage(translate(locale, "cameraDenied"));
+      const code = error instanceof Error ? error.message : "";
+      const messageKey = code === "CAMERA_PERMISSION_DENIED"
+        ? "cameraPermissionDenied"
+        : code === "CAMERA_MISSING"
+          ? "cameraMissing"
+          : code === "CAMERA_BUSY"
+            ? "cameraBusy"
+              : code === "CAMERA_PERMISSION_TIMEOUT"
+                ? "cameraTimeout"
+                : "cameraDenied";
+      setGameMessage(`${translate(locale, messageKey)} ${translate(locale, "cameraRetryHint")}`);
     }
   }
 
