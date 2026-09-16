@@ -14,6 +14,7 @@ import {
   playGame,
   recordReferralAttribution,
   type Hand,
+  type RoundOutcome,
 } from "./lib/api";
 import { initializeLiff } from "./lib/liff";
 import { getInitialLocale, getInitialTheme, saveLocale, saveTheme, translate, type Locale, type Theme } from "./i18n";
@@ -22,6 +23,7 @@ import "./styles.css";
 type AuthState = "loading" | "authenticated" | "preview" | "unavailable";
 type CameraState = "idle" | "starting" | "ready" | "failed";
 type Result = "win" | "lose" | "draw";
+type RoundPhase = "scanning" | "countdown" | "reveal";
 
 const hands: Hand[] = ["rock", "paper", "scissors"];
 
@@ -37,6 +39,10 @@ function App() {
   const [fallbackOptedIn, setFallbackOptedIn] = useState(false);
   const [gameMessage, setGameMessage] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  const [roundPhase, setRoundPhase] = useState<RoundPhase>("scanning");
+  const [roundOutcome, setRoundOutcome] = useState<RoundOutcome | null>(null);
+  const [countdown, setCountdown] = useState(3);
+  const [computerPreview, setComputerPreview] = useState<Hand>("rock");
   const [leaderboardType, setLeaderboardType] = useState<"invitations" | "wins">("invitations");
   const [leaderboard, setLeaderboard] = useState<Array<{ rank: number; score: number; maskedName: string }>>([]);
   const [mgmOptedIn, setMgmOptedIn] = useState(false);
@@ -150,6 +156,9 @@ function App() {
     setDetectedHand(null);
     setModelFailed(false);
     setGameMessage(null);
+    setRoundPhase("scanning");
+    setRoundOutcome(null);
+    setResult(null);
   }
 
   async function runAutomaticRecognition(camera: CameraRecognizer, video: HTMLVideoElement) {
@@ -174,7 +183,7 @@ function App() {
         if (armed && !submittingRef.current && (energyRef.current ?? 0) > 0) {
           armed = false;
           submittingRef.current = true;
-          await submitGame("camera", recognition.hand);
+          await resolveRound("camera", recognition.hand);
           submittingRef.current = false;
         }
         await new Promise((resolve) => window.setTimeout(resolve, 180));
@@ -187,39 +196,75 @@ function App() {
     }
   }
 
-  async function submitGame(mode: "camera" | "manual" | "random", playerHand?: Hand) {
+  async function resolveRound(mode: "camera" | "manual" | "random", playerHand?: Hand) {
+    if (submittingRef.current && mode !== "camera") return;
     if (authState !== "authenticated" && !config?.demoMode) {
       setGameMessage(translate(locale, "gameLockedPreview"));
       return;
     }
 
-    setGameMessage(translate(locale, "playing"));
+    submittingRef.current = true;
+    recognitionRunRef.current += 1;
+    setDetectedHand(playerHand ?? null);
+    setGameMessage(null);
     setResult(null);
+    setRoundOutcome(null);
+    setRoundPhase("countdown");
+    setCountdown(3);
+    let previewIndex = 0;
+    const previewTimer = window.setInterval(() => {
+      setComputerPreview(hands[previewIndex++ % hands.length]);
+    }, 110);
     try {
+      let roundPromise: Promise<{ result: RoundOutcome; energy: number }>;
       if (config?.demoMode) {
-        const response = playDemoGame({ mode, playerHand });
         const currentEnergy = energyRef.current ?? 0;
         if (currentEnergy <= 0) {
+          window.clearInterval(previewTimer);
+          setRoundPhase("scanning");
           setGameMessage(translate(locale, "energyEmpty"));
           return;
         }
         const nextEnergy = Math.max(0, currentEnergy - 1);
-        energyRef.current = nextEnergy;
-        setEnergy(nextEnergy);
-        setResult(response.result);
-        setGameMessage(null);
-        return;
+        roundPromise = Promise.resolve({ result: playDemoGame({ mode, playerHand }), energy: nextEnergy });
+      } else {
+        roundPromise = playGame({ requestId: crypto.randomUUID(), mode, playerHand });
       }
-      const response = await playGame({ requestId: crypto.randomUUID(), mode, playerHand });
+
+      for (const value of [3, 2, 1]) {
+        setCountdown(value);
+        await new Promise((resolve) => window.setTimeout(resolve, 520));
+      }
+
+      const response = await roundPromise;
+      window.clearInterval(previewTimer);
       energyRef.current = response.energy;
       setEnergy(response.energy);
       setResult(response.result.result);
-      setGameMessage(null);
+      setRoundOutcome(response.result);
+      setDetectedHand(response.result.playerHand);
+      setComputerPreview(response.result.hostHand);
+      setRoundPhase("reveal");
     } catch (error) {
+      window.clearInterval(previewTimer);
+      setRoundPhase("scanning");
       const code = error instanceof Error ? error.message : "";
       setGameMessage(
         translate(locale, code === "INSUFFICIENT_ENERGY" ? "energyEmpty" : code === "FALLBACK_DISABLED" ? "fallbackDisabled" : "errorRetry"),
       );
+    } finally {
+      submittingRef.current = false;
+    }
+  }
+
+  function startNextRound() {
+    setRoundPhase("scanning");
+    setRoundOutcome(null);
+    setResult(null);
+    setDetectedHand(null);
+    setGameMessage(null);
+    if (cameraRef.current && videoRef.current) {
+      void runAutomaticRecognition(cameraRef.current, videoRef.current);
     }
   }
 
@@ -285,12 +330,36 @@ function App() {
             <video ref={videoRef} className="camera-preview" autoPlay playsInline muted aria-label={translate(locale, "cameraReady")} />
             {cameraState === "idle" && <span className="camera-placeholder">{translate(locale, "cameraPrompt")}</span>}
             {cameraState === "starting" && <span className="camera-placeholder">{translate(locale, "cameraStarting")}</span>}
-            {cameraState === "ready" && (
+            {cameraState === "ready" && roundPhase === "scanning" && (
               <span className="camera-detection-status">
                 {detectedHand
                   ? translate(locale, "cameraDetected", { hand: translate(locale, detectedHand) })
                   : translate(locale, "cameraScanning")}
               </span>
+            )}
+            {roundPhase !== "scanning" && (
+              <div className={`battle-overlay battle-${roundPhase} battle-${result ?? "pending"}`} role="status" aria-live="assertive">
+                <div className="battle-side">
+                  <span>{translate(locale, "battleYou")}</span>
+                  <strong>{translate(locale, roundOutcome?.playerHand ?? detectedHand ?? "rock")}</strong>
+                </div>
+                <div className="battle-center">
+                  {roundPhase === "countdown" ? (
+                    <b className="battle-countdown">{countdown}</b>
+                  ) : (
+                    <>
+                      <b className="battle-result-title">{resultLabel}</b>
+                      <button className="battle-again" type="button" onClick={startNextRound}>
+                        {translate(locale, "battleAgain")}
+                      </button>
+                    </>
+                  )}
+                </div>
+                <div className="battle-side battle-computer">
+                  <span>{translate(locale, "battleComputer")}</span>
+                  <strong key={`${computerPreview}-${countdown}`}>{translate(locale, computerPreview)}</strong>
+                </div>
+              </div>
             )}
           </div>
 
@@ -305,7 +374,7 @@ function App() {
             </button>
           </div>
 
-          {config?.cameraFallbackEnabled && (cameraState === "failed" || modelFailed || config.demoMode) && !fallbackOptedIn && (
+          {config?.cameraFallbackEnabled && (cameraState === "failed" || modelFailed) && !fallbackOptedIn && (
             <div className="fallback-consent">
               <p>{translate(locale, "fallbackOffer")}</p>
               <button className="secondary-button" type="button" onClick={() => setFallbackOptedIn(true)}>
@@ -314,24 +383,23 @@ function App() {
             </div>
           )}
 
-          {config?.cameraFallbackEnabled && (fallbackOptedIn || config.demoMode) && (
+          {config?.cameraFallbackEnabled && fallbackOptedIn && (
             <div className="fallback-controls">
               <p>{translate(locale, "chooseHand")}</p>
               <div className="hand-row">
                 {hands.map((hand) => (
-                  <button key={hand} className="hand-button" type="button" onClick={() => void submitGame("manual", hand)}>
+                  <button key={hand} className="hand-button" type="button" onClick={() => void resolveRound("manual", hand)}>
                     {translate(locale, hand)}
                   </button>
                 ))}
               </div>
-              <button className="text-button" type="button" onClick={() => void submitGame("random")}>
+              <button className="text-button" type="button" onClick={() => void resolveRound("random")}>
                 {translate(locale, "fallbackRandom")}
               </button>
             </div>
           )}
 
           {gameMessage && <p className="game-message" role="status">{gameMessage}</p>}
-          {resultLabel && <p className={`result-message result-${result}`}>{resultLabel}</p>}
         </section>
 
         <aside className="side-stack">

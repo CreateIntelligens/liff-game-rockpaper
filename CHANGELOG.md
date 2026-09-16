@@ -4,6 +4,7 @@
 
 - Prevented camera startup from hanging when `getUserMedia` or the MediaPipe Worker does not resolve; added timeouts, Worker error propagation, stream cleanup, and pinned the working MediaPipe WASM version.
 - Replaced click-to-recognize with continuous automatic detection, adopted MediaPipe's module-compatible Worker/WASM loading, and added landmark-based rock/paper/scissors fallback classification.
+- Added a locked round state, computer-hand shuffle, 3-2-1 reveal, in-camera win/lose/draw overlay, and explicit “play again” control so one detected gesture creates exactly one round.
 
 ## Unreleased
 

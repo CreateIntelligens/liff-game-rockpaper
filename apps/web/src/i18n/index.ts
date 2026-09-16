@@ -42,6 +42,10 @@ type MessageKey =
   | "resultWin"
   | "resultLose"
   | "resultDraw"
+  | "battleYou"
+  | "battleComputer"
+  | "battleLocked"
+  | "battleAgain"
   | "gameLockedPreview"
   | "leaderboards"
   | "invitationBoard"
@@ -107,9 +111,13 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     paper: "布",
     scissors: "剪刀",
     playing: "結算中…",
-    resultWin: "你贏了！",
-    resultLose: "這局輸了",
-    resultDraw: "平手",
+    resultWin: "勝利！你壓制了電腦",
+    resultLose: "惜敗！下一拳翻盤",
+    resultDraw: "平手！再來一拳",
+    battleYou: "你的出拳",
+    battleComputer: "電腦出拳",
+    battleLocked: "手勢已鎖定",
+    battleAgain: "再戰一局",
     gameLockedPreview: "預覽模式無法進行正式遊戲",
     leaderboards: "排行榜",
     invitationBoard: "邀請排行",
@@ -174,9 +182,13 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     paper: "Paper",
     scissors: "Scissors",
     playing: "Resolving…",
-    resultWin: "You won!",
-    resultLose: "You lost this round",
-    resultDraw: "Draw",
+    resultWin: "Victory! You beat the computer",
+    resultLose: "So close! Take the next round",
+    resultDraw: "Draw! One more round",
+    battleYou: "Your move",
+    battleComputer: "Computer",
+    battleLocked: "Move locked",
+    battleAgain: "Play again",
     gameLockedPreview: "Formal play is unavailable in preview mode",
     leaderboards: "Leaderboards",
     invitationBoard: "Invitations",

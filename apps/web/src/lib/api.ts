@@ -46,6 +46,12 @@ export async function fetchMe() {
 }
 
 export type Hand = "rock" | "paper" | "scissors";
+export type RoundResult = "win" | "lose" | "draw";
+export interface RoundOutcome {
+  playerHand: Hand;
+  hostHand: Hand;
+  result: RoundResult;
+}
 
 export async function playGame(input: { requestId: string; mode: "camera" | "manual" | "random"; playerHand?: Hand }) {
   const response = await fetch("/api/games/plays", {
@@ -54,9 +60,9 @@ export async function playGame(input: { requestId: string; mode: "camera" | "man
     headers: { "content-type": "application/json" },
     body: JSON.stringify(input),
   });
-  const payload = (await response.json()) as { result?: { result: "win" | "lose" | "draw" }; energy?: number; error?: { code: string } };
+  const payload = (await response.json()) as { result?: RoundOutcome; energy?: number; error?: { code: string } };
   if (!response.ok) throw new Error(payload.error?.code ?? "GAME_FAILED");
-  return payload as { result: { result: "win" | "lose" | "draw" }; energy: number };
+  return payload as { result: RoundOutcome; energy: number };
 }
 
 export function playDemoGame(input: { mode: "camera" | "manual" | "random"; playerHand?: Hand }) {
@@ -67,7 +73,7 @@ export function playDemoGame(input: { mode: "camera" | "manual" | "random"; play
     : (playerHand === "rock" && hostHand === "scissors") || (playerHand === "paper" && hostHand === "rock") || (playerHand === "scissors" && hostHand === "paper")
       ? "win"
       : "lose";
-  return { playerHand, hostHand, result } as const;
+  return { playerHand, hostHand, result } satisfies RoundOutcome;
 }
 
 export async function fetchLeaderboard(type: "invitations" | "wins") {
