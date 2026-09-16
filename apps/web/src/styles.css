@@ -91,8 +91,10 @@ h1 { max-width: 9ch; margin: clamp(4rem, 15vw, 8rem) 0 1.25rem; font-size: clamp
 .battle-overlay { position: absolute; inset: 0; z-index: 4; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 0.65rem; padding: clamp(1rem, 4vw, 2.5rem); color: #eef5ff; background: rgba(4, 15, 28, 0.88); backdrop-filter: blur(10px); }
 .battle-side { display: grid; justify-items: center; gap: 0.55rem; min-width: 0; text-align: center; }
 .battle-side span { color: #a9c7d7; font-size: clamp(0.65rem, 2.5vw, 0.85rem); font-weight: 700; }
-.battle-side strong { display: grid; width: clamp(4.8rem, 20vw, 8.5rem); aspect-ratio: 1; place-items: center; border: 2px solid #8fc8bc; border-radius: 1.2rem; color: #eef5ff; background: #163653; font-size: clamp(1.2rem, 5vw, 2.25rem); box-shadow: 0 1rem 3rem rgba(1, 10, 20, 0.35); }
-.battle-computer strong { border-color: #f2c078; background: #583918; animation: computer-shuffle 220ms cubic-bezier(0.16, 1, 0.3, 1); }
+.battle-side strong { position: relative; display: grid; width: clamp(5.4rem, 22vw, 9.5rem); aspect-ratio: 1; place-items: center; overflow: hidden; border: 2px solid #8fc8bc; border-radius: 1.2rem; color: #eef5ff; background: radial-gradient(circle at 50% 42%, #244c68, #102c47 72%); box-shadow: 0 1rem 3rem rgba(1, 10, 20, 0.35); }
+.battle-hand-art { width: 88%; height: 88%; object-fit: contain; transform: translateY(-0.2rem) rotate(-3deg); filter: drop-shadow(0 0.65rem 0.55rem rgba(0, 8, 18, 0.32)); }
+.battle-hand-card small { position: absolute; right: 0.35rem; bottom: 0.35rem; padding: 0.15rem 0.4rem; border: 1px solid rgba(238, 245, 255, 0.3); border-radius: 999px; color: #eef5ff; background: rgba(4, 15, 28, 0.72); font-size: clamp(0.58rem, 1.8vw, 0.72rem); line-height: 1.35; }
+.battle-computer strong { border-color: #f2c078; background: radial-gradient(circle at 50% 42%, #75491c, #3e270f 72%); animation: computer-shuffle 220ms cubic-bezier(0.16, 1, 0.3, 1); }
 .battle-center { display: grid; justify-items: center; gap: 0.9rem; text-align: center; }
 .battle-countdown { font-size: clamp(3.5rem, 14vw, 7rem); line-height: 1; color: #f2c078; animation: countdown-hit 520ms cubic-bezier(0.16, 1, 0.3, 1); }
 .battle-result-title { max-width: 10ch; color: #eef5ff; font-size: clamp(1.15rem, 4vw, 2.1rem); line-height: 1.05; letter-spacing: -0.03em; animation: result-reveal 520ms cubic-bezier(0.16, 1, 0.3, 1); }
@@ -179,7 +181,7 @@ button { font: inherit; }
 
 @media (max-width: 420px) {
   .battle-overlay { grid-template-columns: 1fr 4.5rem 1fr; gap: 0.35rem; padding: 0.75rem; }
-  .battle-side strong { width: clamp(4.2rem, 25vw, 6rem); border-radius: 0.9rem; }
+  .battle-side strong { width: clamp(4.5rem, 27vw, 6.4rem); border-radius: 0.9rem; }
   .battle-result-title { font-size: 1.05rem; }
   .battle-again { padding-inline: 0.7rem; font-size: 0.85rem; }
 }

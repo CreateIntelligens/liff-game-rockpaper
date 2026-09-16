@@ -18,6 +18,9 @@ import {
 } from "./lib/api";
 import { initializeLiff } from "./lib/liff";
 import { getInitialLocale, getInitialTheme, saveLocale, saveTheme, translate, type Locale, type Theme } from "./i18n";
+import rockHand from "./assets/hands/rock.png";
+import paperHand from "./assets/hands/paper.png";
+import scissorsHand from "./assets/hands/scissors.png";
 import "./styles.css";
 
 type AuthState = "loading" | "authenticated" | "preview" | "unavailable";
@@ -26,6 +29,11 @@ type Result = "win" | "lose" | "draw";
 type RoundPhase = "scanning" | "countdown" | "reveal";
 
 const hands: Hand[] = ["rock", "paper", "scissors"];
+const handArt: Record<Hand, string> = {
+  rock: rockHand,
+  paper: paperHand,
+  scissors: scissorsHand,
+};
 
 function App() {
   const [locale, setLocale] = useState<Locale>(() => getInitialLocale());
@@ -323,7 +331,7 @@ function App() {
         <section className="game-panel" aria-label={translate(locale, "title")}>
           <div className="energy-bar">
             <span>{energy === null ? translate(locale, "energyPreparing") : translate(locale, "energy", { value: energy })}</span>
-            <span className="rule-chip">3 / 3</span>
+            <span className="rule-chip">{energy === null ? "—" : energy} / 3</span>
           </div>
 
           <div className="camera-stage">
@@ -341,7 +349,14 @@ function App() {
               <div className={`battle-overlay battle-${roundPhase} battle-${result ?? "pending"}`} role="status" aria-live="assertive">
                 <div className="battle-side">
                   <span>{translate(locale, "battleYou")}</span>
-                  <strong>{translate(locale, roundOutcome?.playerHand ?? detectedHand ?? "rock")}</strong>
+                  <strong className="battle-hand-card">
+                    <img
+                      className="battle-hand-art"
+                      src={handArt[roundOutcome?.playerHand ?? detectedHand ?? "rock"]}
+                      alt={translate(locale, roundOutcome?.playerHand ?? detectedHand ?? "rock")}
+                    />
+                    <small>{translate(locale, roundOutcome?.playerHand ?? detectedHand ?? "rock")}</small>
+                  </strong>
                 </div>
                 <div className="battle-center">
                   {roundPhase === "countdown" ? (
@@ -357,7 +372,10 @@ function App() {
                 </div>
                 <div className="battle-side battle-computer">
                   <span>{translate(locale, "battleComputer")}</span>
-                  <strong key={`${computerPreview}-${countdown}`}>{translate(locale, computerPreview)}</strong>
+                  <strong className="battle-hand-card" key={`${computerPreview}-${countdown}`}>
+                    <img className="battle-hand-art" src={handArt[computerPreview]} alt={translate(locale, computerPreview)} />
+                    <small>{translate(locale, computerPreview)}</small>
+                  </strong>
                 </div>
               </div>
             )}
