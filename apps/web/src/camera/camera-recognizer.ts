@@ -11,7 +11,7 @@ export class CameraRecognizer {
   private stream: MediaStream | null = null;
 
   constructor(
-    private readonly modelPath = "/models/gesture_recognizer.task",
+    private readonly modelPath = `${import.meta.env.BASE_URL}models/gesture_recognizer.task`,
     private readonly wasmPath = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm",
     private readonly modelVersion = "v1",
   ) {

@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "liff-game-rockpaper",
+  "main": "apps/worker/src/index.ts",
+  "compatibility_date": "2026-09-16",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "./apps/web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "vars": {
+    "DEMO_MODE": "false",
+    "APP_NAME": "猜拳挑戰",
+    "LIFF_ID": "",
+    "LIFF_ENABLED": "false",
+    "CAMERA_ENABLED": "true",
+    "CAMERA_FALLBACK_ENABLED": "true",
+    "MGM_ENABLED": "false",
+    "LEADERBOARD_ENABLED": "true",
+    "EMAIL_ENABLED": "false",
+    "RULE_VERSION": "v1",
+    "ASSET_VERSION": "assets-v1"
+  },
+  "env": {
+    "staging": {
+      "name": "liff-game-rockpaper-staging",
+      "vars": {
+        "DEMO_MODE": "false"
+      }
+    }
+  }
+  // Add D1 and Queues bindings after creating Cloudflare resources.
+  // Keep their IDs out of this template until the target account is selected.
+  // "d1_databases": [{ "binding": "DB", "database_name": "liff-game-rockpaper", "database_id": "..." }],
+  // "queues": { "producers": [{ "binding": "EMAIL_QUEUE", "queue": "liff-game-rockpaper-email" }] }
+}

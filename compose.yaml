@@ -8,6 +8,7 @@ services:
       PORT: 3000
       API_BASE_URL: http://localhost/api
       PUBLIC_BASE_URL: http://localhost
+      DEMO_MODE: ${DEMO_MODE:-false}
       DATABASE_PATH: /app/data/game.sqlite
       ALLOWED_ORIGIN: http://localhost
       LIFF_ID: ${LIFF_ID:-}

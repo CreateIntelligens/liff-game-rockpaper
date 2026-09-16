@@ -20,6 +20,7 @@ describe("shared contracts", () => {
         appName: "Rock Paper",
         apiBaseUrl: "https://example.com",
         publicBaseUrl: "https://example.com",
+        demoMode: true,
         liffId: "",
         liffEnabled: true,
         cameraEnabled: true,

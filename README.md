@@ -58,6 +58,26 @@ Services:
 - `web`: Nginx serves the Vite build and proxies `/api` to the API service.
 - `api`: Fastify, SQLite, LINE token verification, game rules, MGM, rankings, and email outbox.
 
+## GitHub Pages demo
+
+GitHub Pages runs the static demo profile. It does not require an API, LIFF ID, LINE secret, database, or Resend key. The included workflow builds with `VITE_DEMO_MODE=true` and publishes `apps/web/dist`.
+
+Enable Pages in the repository settings with **GitHub Actions** as the source. A push to `main` then deploys the demo at the repository subpath.
+
+## Cloudflare Worker
+
+`wrangler.jsonc` is the deployment shell for the formal profile. It serves `apps/web/dist` as Static Assets and exposes `/health` and `/api/config`. D1 and Queues bindings are intentionally commented until the target Cloudflare account has real resources.
+
+```bash
+npm run build --workspace @rockpaper/web
+npx wrangler types apps/worker/worker-configuration.d.ts
+npx wrangler check startup
+npx wrangler deploy --dry-run --env=""
+npx wrangler deploy --env=""
+```
+
+Use `wrangler secret put` for LINE channel secrets and Resend keys. Do not put production secrets in `wrangler.jsonc` or GitHub Pages variables. After D1 and Queues are provisioned, add their real bindings and implement the corresponding adapters behind `packages/ports`.
+
 ## Environment variables
 
 Use `.env.example` as the starting point. `PORT`, `API_BASE_URL`, `PUBLIC_BASE_URL`, `ALLOWED_ORIGIN`, and `DATABASE_PATH` have local defaults; they do not need to be filled for a basic preview. Docker Compose supplies its own internal values.

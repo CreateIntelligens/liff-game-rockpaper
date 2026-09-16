@@ -103,3 +103,9 @@
 - [x] 13.5 Implement mobile-first RWD for 320px phones, landscape phones, tablets, and desktop; verify no horizontal overflow, camera/fallback controls remain reachable, and touch targets are at least 44px
 - [x] 13.6 Add browser tests at 320x568, 390x844, 768x1024, and 1280x800 for locale switching and responsive layout; verify the same information architecture is preserved at every viewport
 - [x] 13.7 Add light and dark theme tokens, system preference detection, persisted theme switch, and contrast coverage; verify both themes render the same controls without horizontal overflow
+
+## 14. Deployment profiles
+
+- [x] 14.1 Add static demo fallback config and GitHub Pages workflow with repository base path; verify a build with `VITE_DEMO_MODE=true` runs without an API server
+- [x] 14.2 Add Cloudflare `wrangler.jsonc`, Worker Static Assets shell, generated Worker types, and environment separation; verify `wrangler types` and `wrangler deploy --dry-run --env=""` succeed without resource placeholder IDs
+- [ ] 14.3 Add Cloudflare D1 and Queues adapters after account resources are provisioned; verify the Workers runtime passes the same ports contract as the Docker runtime

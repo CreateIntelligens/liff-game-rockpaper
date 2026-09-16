@@ -16,6 +16,7 @@
 - 建立可版本化的活動規則、圖片包邊規格與資產設定。
 - 建立遊戲結果 email 通知流程，透過後端安全呼叫 Resend API，支援重試與避免重複寄送。
 - 提供 Docker / Docker Compose 執行版本，包含前端靜態服務、後端 API、SQLite persistent volume 與環境變數設定。
+- 提供 GitHub Pages 靜態 demo profile，以及 Cloudflare Worker / Static Assets 的正式 deployment profile。
 - 施工完成後更新 `README.md` 與 `CHANGELOG.md`，記錄啟動方式、環境變數、活動功能與版本變更。
 - 建立資料與 API 邊界驗證、LINE Token 驗證、權限與敏感設定管理。
 - 建立 domain、ports 與 runtime adapters 邊界，讓目前 Docker runtime 可在未來替換為 Cloudflare Workers、D1、Queues 與 Static Assets。
@@ -33,6 +34,7 @@
 - `result-email-notifications`: 遊戲結果通知、Resend 整合、寄信狀態、重試與冪等性。
 - `game-data-persistence`: SQLite schema、Docker volume、資料一致性與查詢介面。
 - `localized-responsive-ui`: 繁體中文／English 偵測與切換、手機優先 RWD、觸控與可讀性規範。
+- `deployment-profiles`: 一般 Web demo、GitHub Pages、Docker 與 Cloudflare Worker 的啟動邊界與設定。
 
 ### Modified Capabilities
 

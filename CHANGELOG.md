@@ -17,6 +17,7 @@
 - Traditional Chinese / English detection and `繁 | En` preference switch.
 - Light and dark theme token sets with persisted theme switching.
 - Generated campaign gesture collage artwork used as a restrained camera-stage accent.
+- GitHub Pages static demo workflow and Cloudflare Wrangler deployment shell.
 - Mobile-first responsive layout and Playwright viewport checks.
 
 ### Decisions

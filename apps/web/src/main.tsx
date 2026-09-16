@@ -10,6 +10,7 @@ import {
   fetchPublicConfig,
   fetchInviteLink,
   optInMgm,
+  playDemoGame,
   playGame,
   recordReferralAttribution,
   type Hand,
@@ -63,6 +64,7 @@ function App() {
         if (!mounted) return;
         setConfig(loadedConfig);
         setAuthState(nextAuthState === "authenticated" ? "authenticated" : "preview");
+        if (loadedConfig.demoMode) setEnergy(3);
         if (nextAuthState === "authenticated") {
           setEnergy((await fetchMe()).energy);
           setMyRankings(await fetchMyRankings());
@@ -117,7 +119,7 @@ function App() {
   }
 
   async function submitGame(mode: "camera" | "manual" | "random", playerHand?: Hand) {
-    if (authState !== "authenticated") {
+    if (authState !== "authenticated" && !config?.demoMode) {
       setGameMessage(translate(locale, "gameLockedPreview"));
       return;
     }
@@ -125,6 +127,17 @@ function App() {
     setGameMessage(translate(locale, "playing"));
     setResult(null);
     try {
+      if (config?.demoMode) {
+        const response = playDemoGame({ mode, playerHand });
+        if ((energy ?? 0) <= 0) {
+          setGameMessage(translate(locale, "energyEmpty"));
+          return;
+        }
+        setEnergy((current) => Math.max(0, (current ?? 3) - 1));
+        setResult(response.result);
+        setGameMessage(null);
+        return;
+      }
       const response = await playGame({ requestId: crypto.randomUUID(), mode, playerHand });
       setEnergy(response.energy);
       setResult(response.result.result);
@@ -226,7 +239,7 @@ function App() {
             )}
           </div>
 
-          {config?.cameraFallbackEnabled && cameraState === "failed" && !fallbackOptedIn && (
+          {config?.cameraFallbackEnabled && (cameraState === "failed" || config.demoMode) && !fallbackOptedIn && (
             <div className="fallback-consent">
               <p>{translate(locale, "fallbackOffer")}</p>
               <button className="secondary-button" type="button" onClick={() => setFallbackOptedIn(true)}>
@@ -235,7 +248,7 @@ function App() {
             </div>
           )}
 
-          {config?.cameraFallbackEnabled && fallbackOptedIn && (
+          {config?.cameraFallbackEnabled && (fallbackOptedIn || config.demoMode) && (
             <div className="fallback-controls">
               <p>{translate(locale, "chooseHand")}</p>
               <div className="hand-row">

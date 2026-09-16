@@ -164,6 +164,16 @@ Cloudflare 路徑採以下替換策略：React/Vite build 可部署為 Workers S
 
 UI 採 mobile-first responsive layout，目標裝置為 LINE LIFF 內的手機瀏覽器。基礎樣式先支援 320px 以上窄螢幕與觸控，使用 44px 以上觸控目標、safe-area inset、單欄內容與不造成水平捲軸的長文字；在 640px、768px、1024px 以上逐步增加間距與內容寬度，但不改變資訊架構。相機畫面、體力區、fallback controls、排行榜 tabs 與語系切換在橫向手機、平板與桌面都必須可操作。
 
+### 15. Deployment profiles
+
+系統提供三個明確 profile：
+
+- `demo-static`：前端從本地 demo config 啟動，可部署到 GitHub Pages；不呼叫正式 API、不使用 LIFF、不保存正式體力／MGM／排行榜資料。
+- `docker`：Docker Compose 的 `web` + `api`，使用 host SQLite volume，適合本機與單機活動環境。
+- `cloudflare`：Cloudflare Worker + Static Assets，未來以 D1 取代 SQLite、Queues 取代本機 outbox loop；正式 secret 使用 Worker secrets。
+
+GitHub Pages workflow SHALL 以 `VITE_DEMO_MODE=true` 建置，並使用 repository subpath base。Cloudflare `wrangler.jsonc` SHALL 使用當日 compatibility date、Static Assets binding、observability 與 environment 分層；D1/Queues binding 只在實際資源建立後加入，不提交 placeholder ID 作為可部署設定。
+
 ## Risks / Trade-offs
 
 - [LINE 身分或好友狀態判定不完整] → 把 token 驗證、官方帳號加入與 MGM 歸戶拆成明確事件；不能只相信 URL 參數。

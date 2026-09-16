@@ -82,9 +82,9 @@ h1 { max-width: 9ch; margin: clamp(4rem, 15vw, 8rem) 0 1.25rem; font-size: clamp
 .energy-bar, .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .energy-bar { margin-bottom: 0.85rem; color: var(--warm); font-weight: 700; }
 .rule-chip { display: inline-flex; min-height: 1.8rem; align-items: center; padding: 0.2rem 0.55rem; border-radius: 999px; color: var(--bg); background: var(--accent); font-size: 0.75rem; font-weight: 800; }
-.camera-stage { position: relative; aspect-ratio: 4 / 3; overflow: hidden; display: grid; place-items: center; border-radius: 0.8rem; background-color: var(--surface-deep); background-image: linear-gradient(rgba(11, 25, 42, 0.62), rgba(11, 25, 42, 0.62)), url("/assets/campaign/v1/gesture-collage.png"); background-position: center; background-size: cover; }
-[data-theme="light"] .camera-stage { background-image: linear-gradient(rgba(234, 241, 245, 0.72), rgba(234, 241, 245, 0.72)), url("/assets/campaign/v1/gesture-collage.png"); }
-.camera-stage::before { position: absolute; inset: 0.35rem; z-index: 1; content: ""; pointer-events: none; background: url("/assets/campaign/v1/frame.svg") center / 100% 100% no-repeat; opacity: 0.7; }
+.camera-stage { position: relative; aspect-ratio: 4 / 3; overflow: hidden; display: grid; place-items: center; border-radius: 0.8rem; background-color: var(--surface-deep); background-image: linear-gradient(rgba(11, 25, 42, 0.62), rgba(11, 25, 42, 0.62)), url("./assets/gesture-collage.png"); background-position: center; background-size: cover; }
+[data-theme="light"] .camera-stage { background-image: linear-gradient(rgba(234, 241, 245, 0.72), rgba(234, 241, 245, 0.72)), url("./assets/gesture-collage.png"); }
+.camera-stage::before { position: absolute; inset: 0.35rem; z-index: 1; content: ""; pointer-events: none; background: url("./assets/frame.svg") center / 100% 100% no-repeat; opacity: 0.7; }
 .camera-preview { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 .camera-placeholder { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 1rem; color: var(--subtle); text-align: center; }
 .action-row, .hand-row { display: grid; grid-template-columns: 1fr; gap: 0.65rem; margin-top: 0.85rem; }
