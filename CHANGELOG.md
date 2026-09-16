@@ -1,5 +1,9 @@
 # Changelog
 
+## Fixed
+
+- Prevented camera startup from hanging when `getUserMedia` or the MediaPipe Worker does not resolve; added timeouts, Worker error propagation, stream cleanup, and pinned the working MediaPipe WASM version.
+
 ## Unreleased
 
 ### Added

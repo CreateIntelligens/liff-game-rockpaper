@@ -12,49 +12,110 @@ export class CameraRecognizer {
 
   constructor(
     private readonly modelPath = `${import.meta.env.BASE_URL}models/gesture_recognizer.task`,
-    private readonly wasmPath = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm",
+    private readonly wasmPath = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm",
     private readonly modelVersion = "v1",
   ) {
     this.worker = new Worker(new URL("./gesture-worker.ts", import.meta.url), { type: "module" });
   }
 
   async start(video: HTMLVideoElement): Promise<void> {
-    this.stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "user", width: { ideal: 720 }, height: { ideal: 720 } },
-      audio: false,
-    });
+    this.stream = await this.requestCameraStream();
     video.srcObject = this.stream;
     await video.play();
     await new Promise<void>((resolve, reject) => {
+      const timeout = window.setTimeout(() => {
+        this.worker.removeEventListener("message", onMessage);
+        this.worker.removeEventListener("error", onError);
+        reject(new Error("GESTURE_RECOGNIZER_TIMEOUT"));
+      }, 15_000);
       const onMessage = (event: MessageEvent<RecognitionMessage>) => {
         if (event.data.type === "ready") {
           this.worker.removeEventListener("message", onMessage);
+          this.worker.removeEventListener("error", onError);
+          window.clearTimeout(timeout);
           resolve();
         }
         if (event.data.type === "error") {
           this.worker.removeEventListener("message", onMessage);
+          this.worker.removeEventListener("error", onError);
+          window.clearTimeout(timeout);
           reject(new Error(event.data.message));
         }
       };
+      const onError = () => {
+        this.worker.removeEventListener("message", onMessage);
+        this.worker.removeEventListener("error", onError);
+        window.clearTimeout(timeout);
+        reject(new Error("GESTURE_RECOGNIZER_WORKER_FAILED"));
+      };
       this.worker.addEventListener("message", onMessage);
+      this.worker.addEventListener("error", onError);
       this.worker.postMessage({ type: "init", modelPath: this.modelPath, wasmPath: this.wasmPath, modelVersion: this.modelVersion });
+    });
+  }
+
+  private async requestCameraStream(): Promise<MediaStream> {
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error("CAMERA_UNSUPPORTED");
+    const constraints: MediaStreamConstraints = {
+      video: { facingMode: "user", width: { ideal: 720 }, height: { ideal: 720 } },
+      audio: false,
+    };
+    return new Promise<MediaStream>((resolve, reject) => {
+      let settled = false;
+      const timeout = window.setTimeout(() => {
+        settled = true;
+        reject(new Error("CAMERA_PERMISSION_TIMEOUT"));
+      }, 10_000);
+      navigator.mediaDevices.getUserMedia(constraints).then(
+        (stream) => {
+          if (settled) {
+            stream.getTracks().forEach((track) => track.stop());
+            return;
+          }
+          settled = true;
+          window.clearTimeout(timeout);
+          resolve(stream);
+        },
+        (error: unknown) => {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timeout);
+          reject(error instanceof Error ? error : new Error("CAMERA_ACCESS_FAILED"));
+        },
+      );
     });
   }
 
   async recognize(video: HTMLVideoElement, timestamp = performance.now()): Promise<CameraRecognitionResult> {
     const bitmap = await createImageBitmap(video);
     return new Promise((resolve, reject) => {
+      const timeout = window.setTimeout(() => {
+        this.worker.removeEventListener("message", onMessage);
+        this.worker.removeEventListener("error", onError);
+        reject(new Error("GESTURE_RECOGNIZER_TIMEOUT"));
+      }, 10_000);
       const onMessage = (event: MessageEvent<RecognitionMessage>) => {
         if (event.data.type === "result") {
           this.worker.removeEventListener("message", onMessage);
+          this.worker.removeEventListener("error", onError);
+          window.clearTimeout(timeout);
           resolve({ hand: event.data.hand, confidence: event.data.confidence, modelVersion: event.data.modelVersion });
         }
         if (event.data.type === "error") {
           this.worker.removeEventListener("message", onMessage);
+          this.worker.removeEventListener("error", onError);
+          window.clearTimeout(timeout);
           reject(new Error(event.data.message));
         }
       };
+      const onError = () => {
+        this.worker.removeEventListener("message", onMessage);
+        this.worker.removeEventListener("error", onError);
+        window.clearTimeout(timeout);
+        reject(new Error("GESTURE_RECOGNIZER_WORKER_FAILED"));
+      };
       this.worker.addEventListener("message", onMessage);
+      this.worker.addEventListener("error", onError);
       this.worker.postMessage({ type: "frame", bitmap, timestamp }, [bitmap]);
     });
   }

@@ -9,37 +9,44 @@ let recognizer: GestureRecognizer | null = null;
 let modelVersion = "unknown";
 
 self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
-  if (event.data.type === "init") {
-    const vision = await FilesetResolver.forVisionTasks(event.data.wasmPath);
-    recognizer = await GestureRecognizer.createFromOptions(vision, {
-      baseOptions: { modelAssetPath: event.data.modelPath },
-      runningMode: "VIDEO",
-      numHands: 1,
-      cannedGesturesClassifierOptions: {
-        categoryAllowlist: ["Closed_Fist", "Open_Palm", "Victory"],
-        scoreThreshold: 0.6,
-      },
-    });
-    modelVersion = event.data.modelVersion;
-    self.postMessage({ type: "ready", modelVersion });
-    return;
-  }
+  try {
+    if (event.data.type === "init") {
+      const vision = await FilesetResolver.forVisionTasks(event.data.wasmPath);
+      recognizer = await GestureRecognizer.createFromOptions(vision, {
+        baseOptions: { modelAssetPath: event.data.modelPath },
+        runningMode: "VIDEO",
+        numHands: 1,
+        cannedGesturesClassifierOptions: {
+          categoryAllowlist: ["Closed_Fist", "Open_Palm", "Victory"],
+          scoreThreshold: 0.6,
+        },
+      });
+      modelVersion = event.data.modelVersion;
+      self.postMessage({ type: "ready", modelVersion });
+      return;
+    }
 
-  if (!recognizer) {
-    self.postMessage({ type: "error", message: "GESTURE_RECOGNIZER_NOT_READY" });
+    if (!recognizer) {
+      self.postMessage({ type: "error", message: "GESTURE_RECOGNIZER_NOT_READY" });
+      event.data.bitmap.close();
+      return;
+    }
+
+    const result = recognizer.recognizeForVideo(event.data.bitmap, event.data.timestamp);
     event.data.bitmap.close();
-    return;
+    const handCount = result.landmarks.length;
+    const category = handCount === 1 ? result.gestures[0]?.[0] : undefined;
+    const confidence = category?.score ?? 0;
+    self.postMessage({
+      type: "result",
+      hand: handCount === 1 ? mapGestureCategory(category?.categoryName, confidence) : "unknown",
+      confidence,
+      modelVersion,
+    });
+  } catch (error) {
+    self.postMessage({
+      type: "error",
+      message: error instanceof Error ? error.message : "GESTURE_RECOGNIZER_FAILED",
+    });
   }
-
-  const result = recognizer.recognizeForVideo(event.data.bitmap, event.data.timestamp);
-  event.data.bitmap.close();
-  const handCount = result.landmarks.length;
-  const category = handCount === 1 ? result.gestures[0]?.[0] : undefined;
-  const confidence = category?.score ?? 0;
-  self.postMessage({
-    type: "result",
-    hand: handCount === 1 ? mapGestureCategory(category?.categoryName, confidence) : "unknown",
-    confidence,
-    modelVersion,
-  });
 };

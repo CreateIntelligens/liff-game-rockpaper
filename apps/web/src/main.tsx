@@ -107,12 +107,14 @@ function App() {
     if (!videoRef.current) return;
     setCameraState("starting");
     setGameMessage(null);
+    const camera = new CameraRecognizer();
+    cameraRef.current = camera;
     try {
-      const camera = new CameraRecognizer();
       await camera.start(videoRef.current);
-      cameraRef.current = camera;
       setCameraState("ready");
     } catch {
+      cameraRef.current?.stop(videoRef.current);
+      cameraRef.current = null;
       setCameraState("failed");
       setGameMessage(translate(locale, "cameraDenied"));
     }
