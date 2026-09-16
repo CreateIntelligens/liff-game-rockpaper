@@ -51,3 +51,4 @@ No unreleased changes.
 - GitHub Pages deployment succeeded for commit `071f3b6`.
 - Public mobile smoke test verified rear-camera default, front/rear switching, automatic gesture play, zero-energy camera lock, stopped stream, and no horizontal overflow at 390px.
 - TypeScript check, production build, and 9 targeted regression tests passed.
+- Desktop public layout measurement identified and reduced the oversized hero title top spacing from 8rem to 4rem; narrow and landscape layouts use tighter spacing.

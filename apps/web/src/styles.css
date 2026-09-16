@@ -64,7 +64,7 @@ body {
 .locale-switcher button, .theme-switcher button { min-width: 2.75rem; min-height: 2.75rem; padding: 0.5rem 0.65rem; border: 1px solid transparent; border-radius: 0.75rem; color: inherit; background: transparent; font: inherit; font-weight: 700; cursor: pointer; }
 .locale-switcher button[aria-pressed="true"], .theme-switcher button[aria-pressed="true"] { border-color: var(--accent); color: var(--ink); background: var(--surface-soft); }
 .locale-switcher button:focus-visible, .theme-switcher button:focus-visible { outline: 3px solid var(--warm); outline-offset: 2px; }
-h1 { max-width: 9ch; margin: clamp(4rem, 15vw, 8rem) 0 1.25rem; font-size: clamp(3.4rem, 16vw, 8rem); letter-spacing: -0.04em; line-height: 0.92; }
+h1 { max-width: 9ch; margin: clamp(2rem, 6vw, 4rem) 0 1.25rem; font-size: clamp(3.4rem, 16vw, 8rem); letter-spacing: -0.04em; line-height: 0.92; }
 .intro { max-width: 42rem; color: var(--muted); font-size: 1rem; line-height: 1.65; }
 .status-card { display: flex; gap: 1rem; max-width: 42rem; margin-top: 2.5rem; padding: 1rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
 .status-card p { margin: 0.5rem 0 0; color: var(--subtle); line-height: 1.5; }
@@ -176,13 +176,13 @@ button { font: inherit; }
 
 @media (min-width: 1024px) {
   .app-shell { padding-top: 3rem; }
-  h1 { margin-top: 8rem; }
+  h1 { margin-top: 4rem; }
   .game-layout { grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr); align-items: start; gap: 1.5rem; }
   .game-panel { padding: 1rem; }
 }
 
 @media (orientation: landscape) and (max-height: 520px) {
-  h1 { margin-top: 2.5rem; font-size: clamp(2.75rem, 12vw, 5rem); }
+  h1 { margin-top: 1.5rem; font-size: clamp(2.75rem, 12vw, 5rem); }
   .status-card { margin-top: 1.5rem; }
 }
 
