@@ -12,6 +12,10 @@ describe("MediaPipe gesture mapping", () => {
 
   it("rejects unknown and low-confidence gestures", () => {
     expect(mapGestureCategory("Thumb_Up", 0.99)).toBe("unknown");
-    expect(mapGestureCategory("Victory", 0.4)).toBe("unknown");
+    expect(mapGestureCategory("Victory", 0.44)).toBe("unknown");
+  });
+
+  it("accepts a lower-confidence Victory when the frame is still above the tuned threshold", () => {
+    expect(mapGestureCategory("Victory", 0.45)).toBe("scissors");
   });
 });

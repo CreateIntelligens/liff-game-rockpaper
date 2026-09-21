@@ -31,7 +31,7 @@
 - **THEN** 系統停止原串流、以另一個 facing mode 重新啟動辨識，並更新預覽方向
 
 ### Requirement: Pose-tolerant gesture fallback
-瀏覽器端 landmark fallback SHALL 對旋轉、左右手、手掌／手背方向與手指朝向鏡頭造成的透視縮短保有基本猜拳分類能力；無法達到穩定信心時仍回傳 `unknown` 並進入既有 fallback 流程。
+瀏覽器端 landmark fallback SHALL 對旋轉、左右手、手掌／手背方向與手指朝向鏡頭造成的透視縮短保有基本猜拳分類能力；剪刀優先使用食指與中指的核心特徵，布則要求四根手指明確伸直；無法達到穩定信心時仍回傳 `unknown` 並進入既有 fallback 流程。
 
 #### Scenario: Scissors gesture is foreshortened
 - **WHEN** 使用者的食指與中指朝接近鏡頭的方向伸出，導致指尖到手腕的投影距離縮短

@@ -20,28 +20,43 @@ function angleAtJoint(a: HandLandmark, joint: HandLandmark, c: HandLandmark): nu
   return Math.acos(Math.min(1, Math.max(-1, cosine))) * 180 / Math.PI;
 }
 
-function fingerExtended(landmarks: HandLandmark[], mcpIndex: number, pipIndex: number, dipIndex: number, tipIndex: number): boolean {
+type FingerState = "extended" | "folded" | "unknown";
+
+function fingerState(landmarks: HandLandmark[], mcpIndex: number, pipIndex: number, dipIndex: number, tipIndex: number): FingerState {
   const wrist = landmarks[0];
   const mcp = landmarks[mcpIndex];
   const tip = landmarks[tipIndex];
   const pip = landmarks[pipIndex];
   const dip = landmarks[dipIndex];
-  if (!wrist || !mcp || !tip || !pip || !dip) return false;
+  if (!wrist || !mcp || !tip || !pip || !dip) return "unknown";
   const wristDistanceRatio = distance(tip, wrist) / Math.max(distance(pip, wrist), 0.001);
-  const jointAngle = angleAtJoint(mcp, pip, dip);
-  return jointAngle >= 145 || (jointAngle >= 120 && wristDistanceRatio > 1.08);
+  const mcpAngle = angleAtJoint(wrist, mcp, pip);
+  const pipAngle = angleAtJoint(mcp, pip, dip);
+  const dipAngle = angleAtJoint(pip, dip, tip);
+  const extendedAngles = [mcpAngle, pipAngle, dipAngle].filter((angle) => angle >= 135).length;
+  const foldedAngles = [mcpAngle, pipAngle, dipAngle].filter((angle) => angle <= 120).length;
+  if (extendedAngles >= 2 && (pipAngle >= 145 || wristDistanceRatio > 1.08)) return "extended";
+  if (foldedAngles >= 2 || wristDistanceRatio < 0.92) return "folded";
+  return "unknown";
 }
 
 export function classifyRpsLandmarks(landmarks: HandLandmark[] | undefined): Hand | "unknown" {
   if (!landmarks || landmarks.length < 21) return "unknown";
-  const index = fingerExtended(landmarks, 5, 6, 7, 8);
-  const middle = fingerExtended(landmarks, 9, 10, 11, 12);
-  const ring = fingerExtended(landmarks, 13, 14, 15, 16);
-  const pinky = fingerExtended(landmarks, 17, 18, 19, 20);
-  const extendedCount = [index, middle, ring, pinky].filter(Boolean).length;
+  if (landmarks.some((landmark) => !Number.isFinite(landmark.x) || !Number.isFinite(landmark.y) || !Number.isFinite(landmark.z))) {
+    return "unknown";
+  }
+  const states = [
+    fingerState(landmarks, 5, 6, 7, 8),
+    fingerState(landmarks, 9, 10, 11, 12),
+    fingerState(landmarks, 13, 14, 15, 16),
+    fingerState(landmarks, 17, 18, 19, 20),
+  ];
+  const [index, middle, ring, pinky] = states;
+  const extendedCount = states.filter((state) => state === "extended").length;
+  const foldedCount = states.filter((state) => state === "folded").length;
 
-  if (extendedCount === 0) return "rock";
-  if (extendedCount >= 3) return "paper";
-  if (index && middle && !ring && !pinky) return "scissors";
+  if (index === "extended" && middle === "extended" && extendedCount < 4) return "scissors";
+  if (extendedCount === 4) return "paper";
+  if (extendedCount === 0 && foldedCount >= 3) return "rock";
   return "unknown";
 }

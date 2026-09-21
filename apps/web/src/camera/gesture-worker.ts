@@ -1,5 +1,5 @@
 import { FilesetResolver, GestureRecognizer } from "@mediapipe/tasks-vision";
-import { mapGestureCategory } from "./gesture-mapper";
+import { GESTURE_CONFIDENCE_THRESHOLD, mapGestureCategory } from "./gesture-mapper";
 import { classifyRpsLandmarks } from "./landmark-classifier";
 
 type InitMessage = { type: "init"; modelPath: string; wasmPath: string; modelVersion: string };
@@ -17,9 +17,12 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
         baseOptions: { modelAssetPath: event.data.modelPath },
         runningMode: "VIDEO",
         numHands: 1,
+        minHandDetectionConfidence: GESTURE_CONFIDENCE_THRESHOLD,
+        minHandPresenceConfidence: GESTURE_CONFIDENCE_THRESHOLD,
+        minTrackingConfidence: GESTURE_CONFIDENCE_THRESHOLD,
         cannedGesturesClassifierOptions: {
           categoryAllowlist: ["Closed_Fist", "Open_Palm", "Victory"],
-          scoreThreshold: 0.6,
+          scoreThreshold: GESTURE_CONFIDENCE_THRESHOLD,
         },
       });
       modelVersion = event.data.modelVersion;

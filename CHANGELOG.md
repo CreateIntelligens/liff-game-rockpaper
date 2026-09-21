@@ -9,6 +9,8 @@ No unreleased changes.
 ### Fixed
 
 - Improved the browser-side landmark fallback for rotated and foreshortened scissors gestures by combining finger-joint angles with wrist-distance ratios.
+- Classified each finger as extended, folded, or unknown; scissors now prioritizes the index-plus-middle signature while paper requires four clearly extended fingers.
+- Tuned MediaPipe hand detection, tracking, and Victory confidence thresholds to 0.45 so perspective-heavy scissors frames have a recovery path before manual fallback.
 
 ## [0.1.0] - 2026-09-16
 

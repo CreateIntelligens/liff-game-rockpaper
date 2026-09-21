@@ -70,4 +70,18 @@ describe("RPS landmark classifier", () => {
   it("classifies scissors when the extended fingers are foreshortened toward the camera", () => {
     expect(classifyRpsLandmarks(foreshortenedScissors())).toBe("scissors");
   });
+
+  it("keeps scissors when a third finger is falsely reported as extended", () => {
+    expect(classifyRpsLandmarks(landmarksWithExtendedFingers([8, 12, 16]))).toBe("scissors");
+  });
+
+  it("requires all four fingers for paper", () => {
+    expect(classifyRpsLandmarks(landmarksWithExtendedFingers([8, 12, 16]))).not.toBe("paper");
+  });
+
+  it("returns unknown for invalid landmark coordinates", () => {
+    const landmarks = landmarksWithExtendedFingers([8, 12]);
+    landmarks[8].x = Number.NaN;
+    expect(classifyRpsLandmarks(landmarks)).toBe("unknown");
+  });
 });
