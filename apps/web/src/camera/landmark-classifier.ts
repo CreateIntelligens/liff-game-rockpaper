@@ -20,24 +20,36 @@ function angleAtJoint(a: HandLandmark, joint: HandLandmark, c: HandLandmark): nu
   return Math.acos(Math.min(1, Math.max(-1, cosine))) * 180 / Math.PI;
 }
 
-type FingerState = "extended" | "folded" | "unknown";
-
-function fingerState(landmarks: HandLandmark[], mcpIndex: number, pipIndex: number, dipIndex: number, tipIndex: number): FingerState {
+function isFingerExtended(
+  landmarks: HandLandmark[],
+  mcpIndex: number,
+  pipIndex: number,
+  dipIndex: number,
+  tipIndex: number,
+): boolean {
   const wrist = landmarks[0];
   const mcp = landmarks[mcpIndex];
-  const tip = landmarks[tipIndex];
   const pip = landmarks[pipIndex];
   const dip = landmarks[dipIndex];
-  if (!wrist || !mcp || !tip || !pip || !dip) return "unknown";
-  const wristDistanceRatio = distance(tip, wrist) / Math.max(distance(pip, wrist), 0.001);
-  const mcpAngle = angleAtJoint(wrist, mcp, pip);
+  const tip = landmarks[tipIndex];
+  if (!wrist || !mcp || !pip || !dip || !tip) return false;
+
+  const tipWrist = distance(tip, wrist);
+  const pipWrist = distance(pip, wrist);
+  const wristRatio = tipWrist / Math.max(pipWrist, 0.001);
   const pipAngle = angleAtJoint(mcp, pip, dip);
   const dipAngle = angleAtJoint(pip, dip, tip);
-  const extendedAngles = [mcpAngle, pipAngle, dipAngle].filter((angle) => angle >= 135).length;
-  const foldedAngles = [mcpAngle, pipAngle, dipAngle].filter((angle) => angle <= 120).length;
-  if (extendedAngles >= 2 && (pipAngle >= 145 || wristDistanceRatio > 1.08)) return "extended";
-  if (foldedAngles >= 2 || wristDistanceRatio < 0.92) return "folded";
-  return "unknown";
+  const tipMcp = distance(tip, mcp);
+  const pipMcp = distance(pip, mcp);
+
+  // Standard extension (upright, tilted, rotated): tip is clearly further from wrist than PIP
+  if (wristRatio > 1.08 && pipAngle >= 120) return true;
+
+  // Foreshortened extension (fingers pointing towards camera):
+  // PIP joint is straight and tip extends forward beyond PIP relative to MCP
+  if (pipAngle >= 135 && (dipAngle >= 120 || tipMcp > pipMcp * 1.05)) return true;
+
+  return false;
 }
 
 export function classifyRpsLandmarks(landmarks: HandLandmark[] | undefined): Hand | "unknown" {
@@ -45,18 +57,28 @@ export function classifyRpsLandmarks(landmarks: HandLandmark[] | undefined): Han
   if (landmarks.some((landmark) => !Number.isFinite(landmark.x) || !Number.isFinite(landmark.y) || !Number.isFinite(landmark.z))) {
     return "unknown";
   }
-  const states = [
-    fingerState(landmarks, 5, 6, 7, 8),
-    fingerState(landmarks, 9, 10, 11, 12),
-    fingerState(landmarks, 13, 14, 15, 16),
-    fingerState(landmarks, 17, 18, 19, 20),
-  ];
-  const [index, middle, ring, pinky] = states;
-  const extendedCount = states.filter((state) => state === "extended").length;
-  const foldedCount = states.filter((state) => state === "folded").length;
 
-  if (index === "extended" && middle === "extended" && extendedCount < 4) return "scissors";
-  if (extendedCount === 4) return "paper";
-  if (extendedCount === 0 && foldedCount >= 3) return "rock";
+  const indexExt = isFingerExtended(landmarks, 5, 6, 7, 8);
+  const middleExt = isFingerExtended(landmarks, 9, 10, 11, 12);
+  const ringExt = isFingerExtended(landmarks, 13, 14, 15, 16);
+  const pinkyExt = isFingerExtended(landmarks, 17, 18, 19, 20);
+
+  const extendedCount = [indexExt, middleExt, ringExt, pinkyExt].filter(Boolean).length;
+
+  // Paper: all 4 fingers extended, or 3 extended including pinky (scissors never extends pinky)
+  if (extendedCount === 4 || (extendedCount >= 3 && pinkyExt && (!indexExt || !middleExt))) {
+    return "paper";
+  }
+
+  // Scissors: index and middle are extended, pinky is folded (tolerates ring falsely reported extended)
+  if (indexExt && middleExt && !pinkyExt && extendedCount < 4) {
+    return "scissors";
+  }
+
+  // Rock: 0 fingers extended
+  if (extendedCount === 0) {
+    return "rock";
+  }
+
   return "unknown";
 }

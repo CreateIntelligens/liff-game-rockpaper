@@ -43,12 +43,15 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
     const confidence = category?.score ?? 0;
     const cannedHand = handCount === 1 ? mapGestureCategory(category?.categoryName, confidence) : "unknown";
     const landmarkHand = handCount === 1 ? classifyRpsLandmarks(result.landmarks[0]) : "unknown";
+    const resolvedHand = cannedHand === "unknown" && handCount === 1 ? landmarkHand : cannedHand;
+    const resolvedConfidence =
+      cannedHand === "unknown" && landmarkHand !== "unknown"
+        ? Math.max(confidence, GESTURE_CONFIDENCE_THRESHOLD)
+        : confidence;
     self.postMessage({
       type: "result",
-      hand: cannedHand === "unknown" && handCount === 1
-        ? landmarkHand
-        : cannedHand,
-      confidence,
+      hand: resolvedHand,
+      confidence: resolvedConfidence,
       modelVersion,
     });
   } catch (error) {

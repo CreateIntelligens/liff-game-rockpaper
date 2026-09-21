@@ -79,6 +79,24 @@ describe("RPS landmark classifier", () => {
     expect(classifyRpsLandmarks(landmarksWithExtendedFingers([8, 12, 16]))).not.toBe("paper");
   });
 
+  it("classifies realistic fist coordinates as rock", () => {
+    const xs = [0.42, 0.48, 0.54, 0.60];
+    const rock = Array.from({ length: 21 }, () => ({ x: 0.5, y: 0.5, z: 0 }));
+    rock[0] = { x: 0.5, y: 0.8, z: 0 };
+    for (let i = 0; i < 4; i++) {
+      rock[[5, 9, 13, 17][i]] = { x: xs[i], y: 0.55, z: 0 };
+      rock[[6, 10, 14, 18][i]] = { x: xs[i], y: 0.50, z: -0.04 };
+      rock[[7, 11, 15, 19][i]] = { x: xs[i], y: 0.55, z: -0.02 };
+      rock[[8, 12, 16, 20][i]] = { x: xs[i], y: 0.58, z: 0.01 };
+    }
+    expect(classifyRpsLandmarks(rock)).toBe("rock");
+  });
+
+  it("classifies rotated open hand as paper", () => {
+    const rotated = rotateLandmarks(landmarksWithExtendedFingers([8, 12, 16, 20]), 60);
+    expect(classifyRpsLandmarks(rotated)).toBe("paper");
+  });
+
   it("returns unknown for invalid landmark coordinates", () => {
     const landmarks = landmarksWithExtendedFingers([8, 12]);
     landmarks[8].x = Number.NaN;
