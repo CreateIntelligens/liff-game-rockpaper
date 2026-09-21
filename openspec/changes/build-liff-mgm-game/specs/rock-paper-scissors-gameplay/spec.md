@@ -30,6 +30,13 @@
 - **WHEN** 會員在相機運行中選擇切換鏡頭
 - **THEN** 系統停止原串流、以另一個 facing mode 重新啟動辨識，並更新預覽方向
 
+### Requirement: Pose-tolerant gesture fallback
+瀏覽器端 landmark fallback SHALL 對旋轉、左右手、手掌／手背方向與手指朝向鏡頭造成的透視縮短保有基本猜拳分類能力；無法達到穩定信心時仍回傳 `unknown` 並進入既有 fallback 流程。
+
+#### Scenario: Scissors gesture is foreshortened
+- **WHEN** 使用者的食指與中指朝接近鏡頭的方向伸出，導致指尖到手腕的投影距離縮短
+- **THEN** 系統使用指節角度與距離特徵判定剪刀，或在信心不足時明確進入替代出拳流程
+
 ### Requirement: Server-authoritative game result
 正式輸贏、玩家手勢、主持人手勢、體力變更與抽獎資格 SHALL 由後端以目前活動規則判定；前端傳入的結果或獎勵數值 SHALL NOT 被直接採用。
 

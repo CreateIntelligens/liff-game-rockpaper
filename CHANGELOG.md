@@ -4,6 +4,12 @@
 
 No unreleased changes.
 
+## [0.1.1] - 2026-09-21
+
+### Fixed
+
+- Improved the browser-side landmark fallback for rotated and foreshortened scissors gestures by combining finger-joint angles with wrist-distance ratios.
+
 ## [0.1.0] - 2026-09-16
 
 ### Fixed
