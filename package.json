@@ -20,7 +20,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "zod": "^3.25.0"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260916.1",
@@ -29,10 +29,10 @@
     "@types/react-dom": "^19.0.0",
     "playwright": "^1.63.0",
     "prettier": "^3.5.0",
-    "tsup": "^8.4.0",
+    "tsup": "^9.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.8.0",
-    "vitest": "^3.0.0",
-    "wrangler": "^4.132.0"
+    "vitest": "^5.0.5",
+    "wrangler": "^4.154.0"
   }
 }
